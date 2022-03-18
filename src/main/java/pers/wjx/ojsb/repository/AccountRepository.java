@@ -10,5 +10,9 @@ import java.util.List;
 @Mapper
 public interface AccountRepository {
 
-    List<Account> getAllAccount();
+    Account getAccountByUsername(String username);
+
+    Account getAccountByEmail(String username);
+
+    boolean addAccount(Account account);
 }

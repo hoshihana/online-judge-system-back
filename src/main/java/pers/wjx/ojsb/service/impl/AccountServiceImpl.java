@@ -6,7 +6,6 @@ import pers.wjx.ojsb.repository.AccountRepository;
 import pers.wjx.ojsb.service.AccountService;
 
 import javax.annotation.Resource;
-import java.util.List;
 
 @Service
 public class AccountServiceImpl implements AccountService {
@@ -15,7 +14,17 @@ public class AccountServiceImpl implements AccountService {
     private AccountRepository accountRepository;
 
     @Override
-    public List<Account> getAllAccount() {
-        return accountRepository.getAllAccount();
+    public boolean existUsername(String username) {
+        return accountRepository.getAccountByUsername(username) != null;
+    }
+
+    @Override
+    public boolean existEmail(String email) {
+        return accountRepository.getAccountByEmail(email) != null;
+    }
+
+    @Override
+    public boolean addAccount(Account account) {
+        return accountRepository.addAccount(account);
     }
 }
