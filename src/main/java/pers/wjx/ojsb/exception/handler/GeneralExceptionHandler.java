@@ -44,6 +44,6 @@ public class GeneralExceptionHandler {
     @ExceptionHandler(NotLoginException.class)
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     public String handleNotLoginException(NotLoginException ex) {
-        return ex.getMessage();
+        return "请登录后查看";
     }
 }

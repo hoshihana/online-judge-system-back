@@ -6,18 +6,18 @@
         values (#{username}, #{password}, #{email}, #{role});
     </insert>
 
-    <select id="getAccountByUsername" resultType="pers.wjx.ojsb.entity.Account">
+    <select id="getAccountByUsername" resultType="pers.wjx.ojsb.pojo.Account">
         select *
         from account
         where username = #{username}
     </select>
 
-    <select id="getAccountByEmail" resultType="pers.wjx.ojsb.entity.Account">
+    <select id="getAccountByEmail" resultType="pers.wjx.ojsb.pojo.Account">
         select *
         from account
         where email = #{email}
     </select>
-    <select id="getAccountById" resultType="pers.wjx.ojsb.entity.Account">
+    <select id="getAccountById" resultType="pers.wjx.ojsb.pojo.Account">
         select *
         from account
         where id = #{id}

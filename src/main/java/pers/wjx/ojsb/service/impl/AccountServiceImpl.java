@@ -3,7 +3,7 @@ package pers.wjx.ojsb.service.impl;
 import cn.dev33.satoken.secure.SaSecureUtil;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import pers.wjx.ojsb.entity.Account;
+import pers.wjx.ojsb.pojo.Account;
 import pers.wjx.ojsb.repository.AccountRepository;
 import pers.wjx.ojsb.service.AccountService;
 

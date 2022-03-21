@@ -2,7 +2,7 @@ package pers.wjx.ojsb.repository;
 
 import org.apache.ibatis.annotations.Mapper;
 import org.springframework.stereotype.Repository;
-import pers.wjx.ojsb.entity.Account;
+import pers.wjx.ojsb.pojo.Account;
 
 @Repository
 @Mapper

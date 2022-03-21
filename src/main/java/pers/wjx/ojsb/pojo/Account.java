@@ -1,4 +1,4 @@
-package pers.wjx.ojsb.entity;
+package pers.wjx.ojsb.pojo;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
