@@ -18,4 +18,6 @@ public interface ProblemRepository {
     ArrayList<Problem> getProblemsByAuthorId(@Param("authorId") Integer authorId, @Param("startIndex") Integer startIndex, @Param("pageSize") Integer pageSize);
 
     ArrayList<Problem> getProblemsByName(@Param("name") String name, @Param("startIndex") Integer startIndex, @Param("pageSize") Integer pageSize);
+
+    Integer countProblemsByName(String name);
 }

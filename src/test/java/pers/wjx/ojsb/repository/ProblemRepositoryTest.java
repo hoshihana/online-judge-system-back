@@ -20,10 +20,10 @@ class ProblemRepositoryTest {
         problem.setInputFormat("<b>输入格式 输入格式</b><br>输入格式");
         problem.setOutputFormat("输出格式<br>输出格式<br>");
         problem.setExplanation("说明说明<br>说明<br>说<br>明");
-        problem.setSamples("[{'input': '1 1', 'output': '2'}, {'input': '2 3', 'output': '5'}, {'input': '12\n 5', 'output': '4'}]");
+        problem.setSamples("[{\"input\":\"1 1\",\"output\":\"2\"},{\"input\":\"2 3\",\"output\":\"5\"},{\"input\":\"12 5\",\"output\":\"17\"}]");
         problem.setTimeLimit(1000);
         problem.setMemoryLimit(125);
-        for (int i = 0; i < 499; i++) {
+        for (int i = 0; i < 100; i++) {
             problem.setId(null);
             problem.setName("题目" + (i + 1));
             problemRepository.addProblem(problem);

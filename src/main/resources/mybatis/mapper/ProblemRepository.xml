@@ -24,5 +24,10 @@
         where `name` like concat('%', #{name}, '%')
         limit #{startIndex},#{pageSize}
     </select>
+    <select id="countProblemsByName" resultType="java.lang.Integer">
+        select count(*)
+        from problem
+        where `name` like concat('%', #{name}, '%')
+    </select>
 
 </mapper>

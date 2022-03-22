@@ -8,6 +8,7 @@ import pers.wjx.ojsb.service.ProblemService;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
+import java.util.regex.Pattern;
 
 @Service
 public class ProblemServiceImpl implements ProblemService {
@@ -16,22 +17,40 @@ public class ProblemServiceImpl implements ProblemService {
     private ProblemRepository problemRepository;
 
     @Override
-    public ArrayList<ProblemBrief> getProblemBriefByKey(String key, Integer pageIndex, Integer pageSize) {
-        Problem problem = null;
+    public ArrayList<ProblemBrief> getProblemBriefsByKey(String key, boolean byId, Integer pageIndex, Integer pageSize) {
+        key = key.trim();
         ArrayList<ProblemBrief> problemBriefs = new ArrayList<>();
-        try {
-            problem = problemRepository.getProblemById(Integer.valueOf(key));
-        } catch (Exception e) {
-            problem = null;
-        } finally {
-            if (problem != null) {
-                problemBriefs.add(new ProblemBrief(problem.getId(), problem.getName(), problem.getSubmit(), problem.getAccept()));
-            } else {
-                for (Problem problem_ : problemRepository.getProblemsByName(key, (pageIndex - 1) * pageSize, pageSize)) {
-                    problemBriefs.add(new ProblemBrief(problem_.getId(), problem_.getName(), problem_.getSubmit(), problem_.getAccept()));
+        if (byId) {
+            if (Pattern.matches("^\\d{1,8}$", key)) {
+                Problem problem = problemRepository.getProblemById(Integer.valueOf(key));
+                if (problem != null) {
+                    problemBriefs.add(new ProblemBrief(problem.getId(), problem.getName(), problem.getSubmit(), problem.getAccept()));
                 }
             }
-            return problemBriefs;
+        } else {
+            for (Problem problem : problemRepository.getProblemsByName(key, (pageIndex - 1) * pageSize, pageSize)) {
+                problemBriefs.add(new ProblemBrief(problem.getId(), problem.getName(), problem.getSubmit(), problem.getAccept()));
+            }
         }
+        return problemBriefs;
+    }
+
+    @Override
+    public Integer countProblemBriefsByKey(String key, boolean byId) {
+        key = key.trim();
+        if(byId) {
+            if (Pattern.matches("^\\d{1,8}$", key) && problemRepository.getProblemById(Integer.valueOf(key)) != null) {
+                return 1;
+            } else {
+                return 0;
+            }
+        } else {
+            return problemRepository.countProblemsByName(key);
+        }
+    }
+
+    @Override
+    public Problem getProblemById(Integer id) {
+        return problemRepository.getProblemById(id);
     }
 }

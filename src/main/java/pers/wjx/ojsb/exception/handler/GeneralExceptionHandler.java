@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import pers.wjx.ojsb.exception.AlreadyExistedException;
+import pers.wjx.ojsb.exception.NotFoundException;
 import pers.wjx.ojsb.exception.UnauthorizedException;
 import pers.wjx.ojsb.exception.UnknownServerException;
 
@@ -41,9 +42,15 @@ public class GeneralExceptionHandler {
         return ex.getMessage();
     }
 
+    @ExceptionHandler(NotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public String handleUnauthorizedException(NotFoundException ex) {
+        return ex.getMessage();
+    }
+
     @ExceptionHandler(NotLoginException.class)
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     public String handleNotLoginException(NotLoginException ex) {
-        return "请登录后查看";
+        return "请先登录后操作";
     }
 }
