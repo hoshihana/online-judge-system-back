@@ -53,4 +53,9 @@ public class AccountServiceImpl implements AccountService {
             return account.getId();
         }
     }
+
+    @Override
+    public String getUsernameById(Integer id) {
+        return accountRepository.getUsernameById(id);
+    }
 }

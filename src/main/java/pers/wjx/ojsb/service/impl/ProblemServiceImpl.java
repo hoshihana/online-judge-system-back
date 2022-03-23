@@ -28,9 +28,7 @@ public class ProblemServiceImpl implements ProblemService {
                 }
             }
         } else {
-            for (Problem problem : problemRepository.getProblemsByName(key, (pageIndex - 1) * pageSize, pageSize)) {
-                problemBriefs.add(new ProblemBrief(problem.getId(), problem.getName(), problem.getSubmit(), problem.getAccept()));
-            }
+            problemBriefs = problemRepository.getProblemBriefsByName(key, (pageIndex - 1) * pageSize, pageSize);
         }
         return problemBriefs;
     }
@@ -52,5 +50,44 @@ public class ProblemServiceImpl implements ProblemService {
     @Override
     public Problem getProblemById(Integer id) {
         return problemRepository.getProblemById(id);
+    }
+
+    @Override
+    public Integer addProblem(Integer authorId, String name, String description, String inputFormat, String outputFormat, String explanation, String samples, Integer timeLimit, Integer memoryLimit) {
+        Problem problem = new Problem();
+        problem.setAuthorId(authorId);
+        problem.setName(name);
+        problem.setDescription(description);
+        problem.setInputFormat(inputFormat);
+        problem.setOutputFormat(outputFormat);
+        problem.setExplanation(explanation);
+        problem.setSamples(samples);
+        problem.setTimeLimit(timeLimit);
+        problem.setMemoryLimit(memoryLimit);
+        if(problemRepository.addProblem(problem)) {
+            return problem.getId();
+        } else {
+            return null;
+        }
+    }
+
+    @Override
+    public boolean updateProblem(Integer id, String name, String description, String inputFormat, String outputFormat, String explanation, String samples, Integer timeLimit, Integer memoryLimit) {
+        Problem problem = new Problem();
+        problem.setId(id);
+        problem.setName(name);
+        problem.setDescription(description);
+        problem.setInputFormat(inputFormat);
+        problem.setOutputFormat(outputFormat);
+        problem.setExplanation(explanation);
+        problem.setSamples(samples);
+        problem.setTimeLimit(timeLimit);
+        problem.setMemoryLimit(memoryLimit);
+        return problemRepository.updateProblem(problem);
+    }
+
+    @Override
+    public Integer getAuthorIdById(Integer id) {
+        return problemRepository.getAuthorIdById(id);
     }
 }

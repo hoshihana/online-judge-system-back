@@ -10,4 +10,6 @@ public interface AccountService {
     String getRoleById(Integer id);
 
     Integer authenticate(String username, String password);
+
+    String getUsernameById(Integer id);
 }

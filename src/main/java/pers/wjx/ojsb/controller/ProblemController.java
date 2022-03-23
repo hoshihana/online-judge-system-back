@@ -1,13 +1,13 @@
 package pers.wjx.ojsb.controller;
 
 import cn.dev33.satoken.annotation.SaCheckLogin;
+import cn.dev33.satoken.stp.StpUtil;
 import org.hibernate.validator.constraints.Length;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import pers.wjx.ojsb.exception.ForbiddenException;
 import pers.wjx.ojsb.exception.NotFoundException;
+import pers.wjx.ojsb.exception.InternalServerErrorException;
 import pers.wjx.ojsb.pojo.Problem;
 import pers.wjx.ojsb.pojo.ProblemBrief;
 import pers.wjx.ojsb.service.ProblemService;
@@ -27,7 +27,7 @@ public class ProblemController {
 
     @SaCheckLogin
     @GetMapping("")
-    public ArrayList<ProblemBrief> list(@Length(max = 40, message = "搜索关键字长度要在0到40之间") String key,
+    public ArrayList<ProblemBrief> getProblemBriefsByKey(@Length(max = 40, message = "搜索关键字长度要在0到40之间") String key,
                                         @NotNull(message = "查询方式不能为空") boolean byId,
                                         @Min(value = 1, message = "页码不能小于1") Integer pageIndex,
                                         @Min(value = 1, message = "页面大小不能小于1") Integer pageSize) {
@@ -35,15 +35,45 @@ public class ProblemController {
     }
 
     @SaCheckLogin
+    @PostMapping("")    // 创建成功返回题目id
+    public Integer addProblem(@Length(min=1, max = 40, message = "题目名长度要在1到40之间")String name,
+                              String description, String inputFormat, String outputFormat, String explanation, String samples,
+                             @NotNull(message = "时间限制不能为空")@Min(value = 500, message = "时间限制不能少于500ms") Integer timeLimit,
+                             @NotNull(message = "内存限制不能为空")@Min(value = 128, message = "内存限制不能少于128MB") Integer memoryLimit) {
+        Integer id = problemService.addProblem(StpUtil.getLoginIdAsInt(), name, description, inputFormat, outputFormat, explanation, samples, timeLimit, memoryLimit);
+        if(id != null) {
+            return id;
+        } else {
+            throw new InternalServerErrorException("题目创建失败");
+        }
+    }
+
+    @SaCheckLogin
+    @PatchMapping("/{id}")
+    public Integer updateProblem(@PathVariable Integer id, @Length(min=1, max = 40, message = "题目名长度要在1到40之间")String name,
+                                String description, String inputFormat, String outputFormat, String explanation, String samples,
+                                @NotNull(message = "时间限制不能为空")@Min(value = 500, message = "时间限制不能少于500ms") Integer timeLimit,
+                                @NotNull(message = "内存限制不能为空")@Min(value = 128, message = "内存限制不能少于128MB") Integer memoryLimit) {
+        if(problemService.getAuthorIdById(id) != StpUtil.getLoginIdAsInt()) {
+            throw new ForbiddenException("无权编辑该题目");
+        }
+        if(problemService.updateProblem(id, name, description, inputFormat, outputFormat, explanation, samples, timeLimit, memoryLimit)) {
+            return id;
+        } else {
+            throw new InternalServerErrorException("题目编辑失败");
+        }
+    }
+
+    @SaCheckLogin
     @GetMapping("/amount")
-    public Integer amount(@Length(max = 40, message = "搜索关键字长度要在0到40之间") String key,
+    public Integer countProblemByKey(@Length(max = 40, message = "搜索关键字长度要在0到40之间")String key,
                                         @NotNull(message = "查询方式不能为空") boolean byId) {
         return problemService.countProblemBriefsByKey(key == null ? "" : key, byId);
     }
 
     @SaCheckLogin
     @GetMapping("/{id}")
-    public Problem amount(@PathVariable Integer id) {
+    public Problem getProblemById(@PathVariable Integer id) {
         Problem problem = problemService.getProblemById(id);
         if(problem == null) {
             throw new NotFoundException("题号不存在");
@@ -51,4 +81,6 @@ public class ProblemController {
             return problem;
         }
     }
+
+
 }

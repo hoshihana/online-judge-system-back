@@ -15,4 +15,6 @@ public interface AccountRepository {
     Account getAccountById(Integer id);
 
     boolean addAccount(Account account);
+
+    String getUsernameById(Integer id);
 }

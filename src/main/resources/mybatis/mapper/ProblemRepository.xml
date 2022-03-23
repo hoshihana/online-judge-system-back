@@ -2,32 +2,50 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="pers.wjx.ojsb.repository.ProblemRepository">
     <insert id="addProblem" useGeneratedKeys="true" keyProperty="id">
-        insert into problem(id, author_id, `name`, description, input_format, output_format, explanation, samples,
+        insert into problem(author_id, `name`, description, input_format, output_format, explanation, samples,
                             time_limit, memory_limit)
-        values (#{id}, #{authorId}, #{name}, #{description}, #{inputFormat}, #{outputFormat}, #{explanation},
+        values (#{authorId}, #{name}, #{description}, #{inputFormat}, #{outputFormat}, #{explanation},
                 #{samples}, #{timeLimit}, #{memoryLimit})
     </insert>
+    <update id="updateProblem">
+        update problem
+        set `name`=#{name},
+            description=#{description},
+            input_format=#{inputFormat},
+            output_format=#{outputFormat},
+            explanation=#{explanation},
+            samples=#{samples},
+            time_limit=#{timeLimit},
+            memory_limit=#{memoryLimit}
+        where id = #{id}
+    </update>
     <select id="getProblemById" resultType="pers.wjx.ojsb.pojo.Problem">
         select *
         from problem
         where id = #{id}
     </select>
-    <select id="getProblemsByAuthorId" resultType="pers.wjx.ojsb.pojo.Problem">
-        select *
+    <select id="getProblemBriefsByAuthorId" resultType="pers.wjx.ojsb.pojo.ProblemBrief">
+        select id, name, submit, accept
         from problem
-        where author_id = #{authorId}
-        limit #{startIndex},#{pageSize}
+        where author_id = #{authorId} limit #{startIndex}
+            , #{pageSize}
     </select>
-    <select id="getProblemsByName" resultType="pers.wjx.ojsb.pojo.Problem">
-        select *
+    <select id="getProblemBriefsByName" resultType="pers.wjx.ojsb.pojo.ProblemBrief">
+        select id, name, submit, accept
         from problem
         where `name` like concat('%', #{name}, '%')
-        limit #{startIndex},#{pageSize}
+            limit #{startIndex}
+            , #{pageSize}
     </select>
     <select id="countProblemsByName" resultType="java.lang.Integer">
         select count(*)
         from problem
         where `name` like concat('%', #{name}, '%')
+    </select>
+    <select id="getAuthorIdById" resultType="java.lang.Integer">
+        select author_id
+        from problem
+        where id = #{id}
     </select>
 
 </mapper>

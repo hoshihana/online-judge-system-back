@@ -11,4 +11,10 @@ public interface ProblemService {
     Integer countProblemBriefsByKey(String key, boolean byId);
 
     Problem getProblemById(Integer id);
+
+    Integer addProblem(Integer authorId, String name, String description, String inputFormat, String outputFormat, String explanation, String samples, Integer timeLimit, Integer memoryLimit);
+
+    boolean updateProblem(Integer id, String name, String description, String inputFormat, String outputFormat, String explanation, String samples, Integer timeLimit, Integer memoryLimit);
+
+    Integer getAuthorIdById(Integer id);
 }
