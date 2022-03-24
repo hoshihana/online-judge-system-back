@@ -4,7 +4,7 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 import pers.wjx.ojsb.pojo.Problem;
-import pers.wjx.ojsb.pojo.ProblemBrief;
+import pers.wjx.ojsb.pojo.ProblemEntry;
 
 import java.util.ArrayList;
 
@@ -18,11 +18,15 @@ public interface ProblemRepository {
 
     Problem getProblemById(Integer id);
 
-    ArrayList<ProblemBrief> getProblemBriefsByAuthorId(@Param("authorId") Integer authorId, @Param("startIndex") Integer startIndex, @Param("pageSize") Integer pageSize);
+    boolean deleteProblemById(Integer id);
 
-    ArrayList<ProblemBrief> getProblemBriefsByName(@Param("name") String name, @Param("startIndex") Integer startIndex, @Param("pageSize") Integer pageSize);
+    ArrayList<ProblemEntry> getProblemEntriesByAuthorId(@Param("authorId") Integer authorId, @Param("startIndex") Integer startIndex, @Param("pageSize") Integer pageSize);
 
-    Integer countProblemsByName(String name);
+    ArrayList<ProblemEntry> getProblemEntriesByName(@Param("name") String name, @Param("startIndex") Integer startIndex, @Param("pageSize") Integer pageSize);
+
+    Integer countProblemEntriesByName(String name);
+
+    Integer countProblemEntriesByAuthorId(Integer authorId);
 
     Integer getAuthorIdById(Integer id);
 }

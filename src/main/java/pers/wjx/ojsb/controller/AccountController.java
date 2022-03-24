@@ -19,7 +19,7 @@ import javax.annotation.Resource;
 import javax.validation.constraints.NotBlank;
 
 @RestController
-@RequestMapping("/account")
+@RequestMapping("/accounts")
 @Validated
 public class AccountController {
 
@@ -42,18 +42,18 @@ public class AccountController {
     }
 
     @PostMapping("/login")
-    public String login(@NotBlank(message = "用户名不能为空") String username, @NotBlank(message = "密码不能为空") String password) {
+    public Integer login(@NotBlank(message = "用户名不能为空") String username, @NotBlank(message = "密码不能为空") String password) {
         Integer accountId = accountService.authenticate(username, password);
         if(accountId == null) {
             throw new UnauthorizedException("用户名或密码错误");
         } else {
             StpUtil.login(accountId);
             StpUtil.getSession(true).setAttribute("username", username);
-            return "登录成功";
+            return accountId;
         }
     }
 
-    @GetMapping("/login/status")
+    @GetMapping("/loginStatus")
     public LoginStatus getLoginStatus() {
         LoginStatus loginStatus = new LoginStatus();
         if(!StpUtil.isLogin()) {

@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ProblemBrief {
+public class ProblemEntry {
     private Integer id;
 
     private String name;

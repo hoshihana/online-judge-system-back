@@ -1,14 +1,18 @@
 package pers.wjx.ojsb.service;
 
 import pers.wjx.ojsb.pojo.Problem;
-import pers.wjx.ojsb.pojo.ProblemBrief;
+import pers.wjx.ojsb.pojo.ProblemEntry;
 
 import java.util.ArrayList;
 
 public interface ProblemService {
-    ArrayList<ProblemBrief> getProblemBriefsByKey(String key, boolean byId, Integer pageIndex, Integer pageSize);
+    ArrayList<ProblemEntry> getProblemEntriesByKey(String key, boolean byId, Integer pageIndex, Integer pageSize);
 
-    Integer countProblemBriefsByKey(String key, boolean byId);
+    Integer countProblemEntriesByKey(String key, boolean byId);
+
+    ArrayList<ProblemEntry> getProblemEntriesByAuthorId(Integer authorId, Integer pageIndex, Integer pageSize);
+
+    Integer countProblemEntriesByAuthorId(Integer authorId);
 
     Problem getProblemById(Integer id);
 
@@ -17,4 +21,6 @@ public interface ProblemService {
     boolean updateProblem(Integer id, String name, String description, String inputFormat, String outputFormat, String explanation, String samples, Integer timeLimit, Integer memoryLimit);
 
     Integer getAuthorIdById(Integer id);
+
+    boolean deleteProblemById(Integer id);
 }

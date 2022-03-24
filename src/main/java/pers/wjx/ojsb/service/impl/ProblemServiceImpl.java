@@ -2,7 +2,7 @@ package pers.wjx.ojsb.service.impl;
 
 import org.springframework.stereotype.Service;
 import pers.wjx.ojsb.pojo.Problem;
-import pers.wjx.ojsb.pojo.ProblemBrief;
+import pers.wjx.ojsb.pojo.ProblemEntry;
 import pers.wjx.ojsb.repository.ProblemRepository;
 import pers.wjx.ojsb.service.ProblemService;
 
@@ -17,24 +17,24 @@ public class ProblemServiceImpl implements ProblemService {
     private ProblemRepository problemRepository;
 
     @Override
-    public ArrayList<ProblemBrief> getProblemBriefsByKey(String key, boolean byId, Integer pageIndex, Integer pageSize) {
+    public ArrayList<ProblemEntry> getProblemEntriesByKey(String key, boolean byId, Integer pageIndex, Integer pageSize) {
         key = key.trim();
-        ArrayList<ProblemBrief> problemBriefs = new ArrayList<>();
+        ArrayList<ProblemEntry> problemEntries = new ArrayList<>();
         if (byId) {
             if (Pattern.matches("^\\d{1,8}$", key)) {
                 Problem problem = problemRepository.getProblemById(Integer.valueOf(key));
                 if (problem != null) {
-                    problemBriefs.add(new ProblemBrief(problem.getId(), problem.getName(), problem.getSubmit(), problem.getAccept()));
+                    problemEntries.add(new ProblemEntry(problem.getId(), problem.getName(), problem.getSubmit(), problem.getAccept()));
                 }
             }
         } else {
-            problemBriefs = problemRepository.getProblemBriefsByName(key, (pageIndex - 1) * pageSize, pageSize);
+            problemEntries = problemRepository.getProblemEntriesByName(key, (pageIndex - 1) * pageSize, pageSize);
         }
-        return problemBriefs;
+        return problemEntries;
     }
 
     @Override
-    public Integer countProblemBriefsByKey(String key, boolean byId) {
+    public Integer countProblemEntriesByKey(String key, boolean byId) {
         key = key.trim();
         if(byId) {
             if (Pattern.matches("^\\d{1,8}$", key) && problemRepository.getProblemById(Integer.valueOf(key)) != null) {
@@ -43,8 +43,18 @@ public class ProblemServiceImpl implements ProblemService {
                 return 0;
             }
         } else {
-            return problemRepository.countProblemsByName(key);
+            return problemRepository.countProblemEntriesByName(key);
         }
+    }
+
+    @Override
+    public ArrayList<ProblemEntry> getProblemEntriesByAuthorId(Integer authorId, Integer pageIndex, Integer pageSize) {
+        return problemRepository.getProblemEntriesByAuthorId(authorId, (pageIndex - 1) * pageSize, pageSize);
+    }
+
+    @Override
+    public Integer countProblemEntriesByAuthorId(Integer authorId) {
+        return problemRepository.countProblemEntriesByAuthorId(authorId);
     }
 
     @Override
@@ -89,5 +99,10 @@ public class ProblemServiceImpl implements ProblemService {
     @Override
     public Integer getAuthorIdById(Integer id) {
         return problemRepository.getAuthorIdById(id);
+    }
+
+    @Override
+    public boolean deleteProblemById(Integer id) {
+        return problemRepository.deleteProblemById(id);
     }
 }
