@@ -23,4 +23,6 @@ public interface ProblemService {
     Integer getAuthorIdById(Integer id);
 
     boolean deleteProblemById(Integer id);
+
+    boolean existProblem(Integer id);
 }

@@ -28,5 +28,9 @@ public interface ProblemRepository {
 
     Integer countProblemEntriesByAuthorId(Integer authorId);
 
+    Integer countProblemEntriesById(Integer id);
+
     Integer getAuthorIdById(Integer id);
+
+    boolean increaseSubmit(Integer id);
 }

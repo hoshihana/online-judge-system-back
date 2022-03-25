@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="pers.wjx.ojsb.repository.RecordRepository">
+    <insert id="addRecord" useGeneratedKeys="true" keyProperty="id">
+        insert into record(user_id, username, problem_id, submit_time, code_length, submit_language)
+        values (#{userId}, #{username}, #{problemId}, #{submitTime}, #{codeLength}, #{submitLanguage})
+    </insert>
+    <select id="getRecords" resultType="pers.wjx.ojsb.pojo.Record">
+        select *
+        from record
+        where username like concat('%', #{username}, '%')
+        <if test="problemId != null">
+            and problem_id = #{problemId}
+        </if>
+        <if test="submitLanguage != null">
+            and submit_language = #{submitLanguage}
+        </if>
+        <if test="judgeResult != null">
+            and judge_result = #{judgeResult}
+        </if>
+        <choose>
+            <when test="asc != null">
+                <choose>
+                    <when test="orderBy == 'submitTime'">
+                        order by submit_time
+                    </when>
+                    <when test="orderBy == 'executeTime'">
+                        order by execute_time
+                    </when>
+                    <when test="orderBy == 'executeMemory'">
+                        order by execute_memory
+                    </when>
+                </choose>
+                <if test="asc == false">
+                    desc
+                </if>
+            </when>
+            <otherwise>
+                order by id desc
+            </otherwise>
+        </choose>
+        limit #{startIndex}, #{pageSize}
+    </select>
+    <select id="countRecords" resultType="java.lang.Integer">
+        select count(*)
+        from record
+        where username like concat('%', #{username}, '%')
+        <if test="problemId != null">
+            and problem_id = #{problemId}
+        </if>
+        <if test="submitLanguage != null">
+            and submit_language = #{submitLanguage}
+        </if>
+        <if test="judgeResult != null">
+            and judge_result = #{judgeResult}
+        </if>
+    </select>
+</mapper>

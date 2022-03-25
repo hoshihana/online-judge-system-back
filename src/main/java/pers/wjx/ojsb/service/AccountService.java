@@ -5,6 +5,8 @@ public interface AccountService {
 
     boolean existEmail(String email);
 
+    boolean existAccount(Integer id);
+
     boolean userRegister(String username, String password, String email);
 
     String getRoleById(Integer id);

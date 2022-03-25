@@ -105,4 +105,9 @@ public class ProblemServiceImpl implements ProblemService {
     public boolean deleteProblemById(Integer id) {
         return problemRepository.deleteProblemById(id);
     }
+
+    @Override
+    public boolean existProblem(Integer id) {
+        return problemRepository.countProblemEntriesById(id) > 0;
+    }
 }

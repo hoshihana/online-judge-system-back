@@ -29,6 +29,11 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
+    public boolean existAccount(Integer id) {
+        return accountRepository.countAccountsById(id) > 0;
+    }
+
+    @Override
     public boolean userRegister(String username, String password, String email) {
         Account userAccount = new Account();
         userAccount.setUsername(username);

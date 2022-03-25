@@ -19,8 +19,14 @@
             memory_limit=#{memoryLimit}
         where id = #{id}
     </update>
+    <update id="increaseSubmit">
+        update problem
+        set submit = submit + 1
+        where id = #{id}
+    </update>
     <delete id="deleteProblemById">
-        delete from problem
+        delete
+        from problem
         where id = #{id}
     </delete>
     <select id="getProblemById" resultType="pers.wjx.ojsb.pojo.Problem">
@@ -33,14 +39,13 @@
         from problem
         where author_id = #{authorId}
         order by id desc
-        limit #{startIndex}, #{pageSize}
+            limit #{startIndex}, #{pageSize}
     </select>
     <select id="getProblemEntriesByName" resultType="pers.wjx.ojsb.pojo.ProblemEntry">
         select id, name, submit, accept
         from problem
         where `name` like concat('%', #{name}, '%')
-            limit #{startIndex}
-            , #{pageSize}
+            limit #{startIndex}, #{pageSize}
     </select>
     <select id="countProblemEntriesByName" resultType="java.lang.Integer">
         select count(*)
@@ -56,6 +61,11 @@
         select count(*)
         from problem
         where author_id = #{authorId}
+    </select>
+    <select id="countProblemEntriesById" resultType="java.lang.Integer">
+        select count(*)
+        from problem
+        where id = #{id}
     </select>
 
 </mapper>

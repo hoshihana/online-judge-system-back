@@ -1,22 +1,22 @@
 package pers.wjx.ojsb.controller;
 
 import cn.dev33.satoken.stp.StpUtil;
+import org.hibernate.validator.constraints.Length;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import pers.wjx.ojsb.constraint.EmailConstraint;
-import pers.wjx.ojsb.constraint.PasswordConstraint;
-import pers.wjx.ojsb.constraint.UsernameConstraint;
-import pers.wjx.ojsb.exception.AlreadyExistedException;
+import pers.wjx.ojsb.exception.BadRequestException;
 import pers.wjx.ojsb.exception.UnauthorizedException;
 import pers.wjx.ojsb.exception.InternalServerErrorException;
 import pers.wjx.ojsb.pojo.LoginStatus;
 import pers.wjx.ojsb.service.AccountService;
 
 import javax.annotation.Resource;
+import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Pattern;
 
 @RestController
 @RequestMapping("/accounts")
@@ -27,12 +27,19 @@ public class AccountController {
     private AccountService accountService;
 
     @PostMapping("/register")
-    public String register(@UsernameConstraint String username, @PasswordConstraint String password, @EmailConstraint String email) {
+    public String register(@Pattern(regexp = "^\\w+$", message = "用户名只能含有数字、字母或下划线")
+                           @Length(min = 6, max = 16, message = "用户名长度必须在6到16位之间")
+                           @NotBlank(message = "用户名不能为空") String username,
+                           @Pattern(regexp = "^[A-Za-z0-9]+$", message = "密码只能含有数字或字母")
+                           @Length(min = 6, max = 16, message = "密码长度必须在6到16位之间")
+                           @NotBlank(message = "密码不能为空") String password,
+                           @Email(message = "邮箱格式不正确")
+                           @NotBlank(message = "邮箱不能为空") String email) {
         if (accountService.existUsername(username)) {
-            throw new AlreadyExistedException("该用户名已被注册");
+            throw new BadRequestException("该用户名已被注册");
         }
         if (accountService.existEmail(email)) {
-            throw new AlreadyExistedException("该邮箱已被注册");
+            throw new BadRequestException("该邮箱已被注册");
         }
         if (accountService.userRegister(username, password, email)) {
             return "注册成功";
@@ -44,7 +51,7 @@ public class AccountController {
     @PostMapping("/login")
     public Integer login(@NotBlank(message = "用户名不能为空") String username, @NotBlank(message = "密码不能为空") String password) {
         Integer accountId = accountService.authenticate(username, password);
-        if(accountId == null) {
+        if (accountId == null) {
             throw new UnauthorizedException("用户名或密码错误");
         } else {
             StpUtil.login(accountId);
@@ -56,12 +63,12 @@ public class AccountController {
     @GetMapping("/loginStatus")
     public LoginStatus getLoginStatus() {
         LoginStatus loginStatus = new LoginStatus();
-        if(!StpUtil.isLogin()) {
+        if (!StpUtil.isLogin()) {
             loginStatus.setLogin(false);
         } else {
             loginStatus.setLogin(true);
             loginStatus.setUserid(StpUtil.getLoginIdAsInt());
-            loginStatus.setUsername((String)StpUtil.getSession().getAttribute("username"));
+            loginStatus.setUsername((String) StpUtil.getSession().getAttribute("username"));
         }
         return loginStatus;
     }

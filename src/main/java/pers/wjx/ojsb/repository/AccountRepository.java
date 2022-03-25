@@ -17,4 +17,6 @@ public interface AccountRepository {
     boolean addAccount(Account account);
 
     String getUsernameById(Integer id);
+
+    Integer countAccountsById(Integer id);
 }

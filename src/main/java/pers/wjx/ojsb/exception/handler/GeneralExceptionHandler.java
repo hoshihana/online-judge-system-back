@@ -20,9 +20,9 @@ public class GeneralExceptionHandler {
         return ex.getConstraintViolations().stream().map(ConstraintViolation::getMessage).collect(Collectors.joining(";"));
     }
 
-    @ExceptionHandler(AlreadyExistedException.class)
+    @ExceptionHandler(BadRequestException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public String handleAlreadyExistedException(AlreadyExistedException ex) {
+    public String handleBadRequestException(BadRequestException ex) {
         return ex.getMessage();
     }
 
