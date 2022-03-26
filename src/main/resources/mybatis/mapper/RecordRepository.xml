@@ -55,4 +55,16 @@
             and judge_result = #{judgeResult}
         </if>
     </select>
+    <select id="getRecordById" resultType="pers.wjx.ojsb.pojo.Record">
+        select *
+        from record
+        where id = #{id}
+    </select>
+    <select id="getRecentRecords" resultType="pers.wjx.ojsb.pojo.Record">
+        select *
+        from record
+        where user_id = #{userId} and problem_id = #{problemId}
+        order by submit_time desc
+        limit #{limit}
+    </select>
 </mapper>

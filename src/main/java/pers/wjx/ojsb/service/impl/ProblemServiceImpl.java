@@ -3,7 +3,9 @@ package pers.wjx.ojsb.service.impl;
 import org.springframework.stereotype.Service;
 import pers.wjx.ojsb.pojo.Problem;
 import pers.wjx.ojsb.pojo.ProblemEntry;
+import pers.wjx.ojsb.pojo.TryPassAmountPair;
 import pers.wjx.ojsb.repository.ProblemRepository;
+import pers.wjx.ojsb.repository.ProblemUserRepository;
 import pers.wjx.ojsb.service.ProblemService;
 
 import javax.annotation.Resource;
@@ -15,6 +17,9 @@ public class ProblemServiceImpl implements ProblemService {
 
     @Resource
     private ProblemRepository problemRepository;
+
+    @Resource
+    private ProblemUserRepository problemUserRepository;
 
     @Override
     public ArrayList<ProblemEntry> getProblemEntriesByKey(String key, boolean byId, Integer pageIndex, Integer pageSize) {
@@ -109,5 +114,10 @@ public class ProblemServiceImpl implements ProblemService {
     @Override
     public boolean existProblem(Integer id) {
         return problemRepository.countProblemEntriesById(id) > 0;
+    }
+
+    @Override
+    public TryPassAmountPair getTryPassAmountPairById(Integer id) {
+        return new TryPassAmountPair(problemUserRepository.countTriedUserByProblemId(id), problemUserRepository.countPassedUserByProblemId(id));
     }
 }

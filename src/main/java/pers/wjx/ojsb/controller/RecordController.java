@@ -3,10 +3,7 @@ package pers.wjx.ojsb.controller;
 import cn.dev33.satoken.annotation.SaCheckLogin;
 import cn.dev33.satoken.stp.StpUtil;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import pers.wjx.ojsb.exception.BadRequestException;
 import pers.wjx.ojsb.exception.InternalServerErrorException;
 import pers.wjx.ojsb.pojo.Record;
@@ -75,5 +72,23 @@ public class RecordController {
             username = (String) StpUtil.getSession().getAttribute("username");
         }
         return recordService.countRecords(problemId, username, submitLanguage, judgeResult);
+    }
+
+    @SaCheckLogin
+    @GetMapping("/{id}")
+    public Record getRecords(@PathVariable Integer id) {
+        return recordService.getRecordById(id);
+    }
+
+    @SaCheckLogin
+    @GetMapping("/{id}/code")
+    public String getCode(@PathVariable Integer id, Language submitLanguage, Integer codeLength) {
+        return recordService.getCode(id, submitLanguage, codeLength);
+    }
+
+    @SaCheckLogin
+    @GetMapping("/recent")
+    public ArrayList<Record> getRecentRecords(Integer problemId, Integer userId, @Min(value = 0, message = "返回记录条数必须为非负数") Integer limit) {
+        return recordService.getRecentRecords(problemId, userId, limit);
     }
 }

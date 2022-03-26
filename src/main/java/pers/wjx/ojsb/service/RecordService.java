@@ -15,4 +15,10 @@ public interface RecordService {
     ArrayList<Record> getRecords(String problemId, String username, Language submitLanguage, JudgeResult judgeResult, String orderBy, Boolean asc, Integer pageIndex, Integer pageSize);
 
     Integer countRecords(String problemId, String username, Language submitLanguage, JudgeResult judgeResult);
+
+    Record getRecordById(Integer id);
+
+    String getCode(Integer id, Language submitLanguage, Integer codeLength);
+
+    ArrayList<Record> getRecentRecords(Integer problemId, Integer userId, Integer limit);
 }

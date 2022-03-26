@@ -2,6 +2,7 @@ package pers.wjx.ojsb.service;
 
 import pers.wjx.ojsb.pojo.Problem;
 import pers.wjx.ojsb.pojo.ProblemEntry;
+import pers.wjx.ojsb.pojo.TryPassAmountPair;
 
 import java.util.ArrayList;
 
@@ -25,4 +26,6 @@ public interface ProblemService {
     boolean deleteProblemById(Integer id);
 
     boolean existProblem(Integer id);
+
+    TryPassAmountPair getTryPassAmountPairById(Integer id);
 }

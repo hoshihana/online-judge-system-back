@@ -17,4 +17,8 @@ public interface RecordRepository {
     ArrayList<Record> getRecords(Integer problemId, String username, Language submitLanguage, JudgeResult judgeResult, String orderBy, Boolean asc, Integer startIndex, Integer pageSize);
 
     Integer countRecords(Integer problemId, String username, Language submitLanguage, JudgeResult judgeResult);
+
+    Record getRecordById(Integer id);
+
+    ArrayList<Record> getRecentRecords(Integer problemId, Integer userId, Integer limit);
 }

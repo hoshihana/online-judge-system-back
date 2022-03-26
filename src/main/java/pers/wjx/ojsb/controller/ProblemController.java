@@ -9,7 +9,10 @@ import pers.wjx.ojsb.exception.ForbiddenException;
 import pers.wjx.ojsb.exception.NotFoundException;
 import pers.wjx.ojsb.exception.InternalServerErrorException;
 import pers.wjx.ojsb.pojo.Problem;
+import pers.wjx.ojsb.pojo.ProblemUserRelation;
+import pers.wjx.ojsb.pojo.TryPassAmountPair;
 import pers.wjx.ojsb.service.ProblemService;
+import pers.wjx.ojsb.service.ProblemUserService;
 
 import javax.annotation.Resource;
 import javax.validation.constraints.Min;
@@ -22,6 +25,9 @@ public class ProblemController {
 
     @Resource
     private ProblemService problemService;
+
+    @Resource
+    private ProblemUserService problemUserService;
 
     @SaCheckLogin
     @PostMapping("")    // 创建成功返回题目id
@@ -88,5 +94,17 @@ public class ProblemController {
         } else {
             return authorId;
         }
+    }
+
+    @SaCheckLogin
+    @GetMapping("/{id}/amount")
+    public TryPassAmountPair getTryPassAmountById(@PathVariable Integer id) {
+        return problemService.getTryPassAmountPairById(id);
+    }
+
+    @SaCheckLogin
+    @GetMapping("/{problemId}/users/{userId}")
+    public ProblemUserRelation getProblemUserRelation(@PathVariable Integer userId, @PathVariable Integer problemId) {
+        return problemUserService.getProblemUserRelation(userId, problemId);
     }
 }
