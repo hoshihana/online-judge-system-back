@@ -1,5 +1,6 @@
 package pers.wjx.ojsb.service.impl;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
@@ -35,7 +36,8 @@ public class RecordServiceImpl implements RecordService {
     @Resource
     private ProblemUserRepository problemUserRepository;
 
-    public static final String codeLocation = "C:\\Users\\81050\\Desktop\\submit-code\\";
+    @Value("${code-location}")
+    public String codeLocation;
 
     @Override
     @Transactional(rollbackFor = Exception.class)

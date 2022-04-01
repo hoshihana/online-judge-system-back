@@ -29,6 +29,8 @@ public class Problem {
 
     private Integer memoryLimit;
 
+    private Boolean testSet;
+
     private Integer visibility; //todo: 处理可见性问题
 
     private Integer submit;

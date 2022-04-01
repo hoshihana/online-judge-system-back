@@ -24,6 +24,11 @@
         set submit = submit + 1
         where id = #{id}
     </update>
+    <update id="setTestSet">
+        update problem
+        set test_set = 1
+        where id = #{id}
+    </update>
     <delete id="deleteProblemById">
         delete
         from problem

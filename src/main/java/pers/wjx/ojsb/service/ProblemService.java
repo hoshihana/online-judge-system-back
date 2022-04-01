@@ -1,7 +1,10 @@
 package pers.wjx.ojsb.service;
 
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.web.multipart.MultipartFile;
 import pers.wjx.ojsb.pojo.Problem;
 import pers.wjx.ojsb.pojo.ProblemEntry;
+import pers.wjx.ojsb.pojo.TestFileInfo;
 import pers.wjx.ojsb.pojo.TryPassAmountPair;
 
 import java.util.ArrayList;
@@ -28,4 +31,12 @@ public interface ProblemService {
     boolean existProblem(Integer id);
 
     TryPassAmountPair getTryPassAmountPairById(Integer id);
+
+    TestFileInfo saveTestFile(Integer id, MultipartFile file);
+
+    boolean deleteTestFile(Integer id);
+
+    TestFileInfo getTestFileInfo(Integer id);
+
+    FileSystemResource getTestFileResource(Integer id);
 }

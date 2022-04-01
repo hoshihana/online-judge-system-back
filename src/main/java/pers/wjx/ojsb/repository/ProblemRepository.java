@@ -33,4 +33,6 @@ public interface ProblemRepository {
     Integer getAuthorIdById(Integer id);
 
     boolean increaseSubmit(Integer id);
+
+    boolean setTestSet(Integer id);
 }
