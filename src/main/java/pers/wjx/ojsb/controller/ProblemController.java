@@ -42,8 +42,8 @@ public class ProblemController {
     @PostMapping("")    // 创建成功返回题目id
     public Integer addProblem(@Length(min = 1, max = 40, message = "题目名长度要在1到40之间") String name,
                               String description, String inputFormat, String outputFormat, String explanation, String samples,
-                              @NotNull(message = "时间限制不能为空") @Range(min = 500, max = 20000, message = "时间限制必须在500ms到20000ms之间") Integer timeLimit,
-                              @NotNull(message = "内存限制不能为空") @Range(min = 128, max = 1024, message = "内存限制必须在128MB到1024MB之间") Integer memoryLimit) {
+                              @NotNull(message = "时间限制不能为空") @Range(min = 500, max = 15000, message = "时间限制必须在500ms到15000ms之间") Integer timeLimit,
+                              @NotNull(message = "内存限制不能为空") @Range(min = 128, max = 512, message = "内存限制必须在128MB到512MB之间") Integer memoryLimit) {
         Integer id = problemService.addProblem(StpUtil.getLoginIdAsInt(), name, description, inputFormat, outputFormat, explanation, samples, timeLimit, memoryLimit);
         if (id != null) {
             return id;
@@ -56,8 +56,8 @@ public class ProblemController {
     @PatchMapping("/{id}")
     public Integer updateProblem(@PathVariable Integer id, @Length(min = 1, max = 40, message = "题目名长度要在1到40之间") String name,
                                  String description, String inputFormat, String outputFormat, String explanation, String samples,
-                                 @NotNull(message = "时间限制不能为空") @Min(value = 500, message = "时间限制不能少于500ms") Integer timeLimit,
-                                 @NotNull(message = "内存限制不能为空") @Min(value = 128, message = "内存限制不能少于128MB") Integer memoryLimit) {
+                                 @NotNull(message = "时间限制不能为空") @Range(min = 500, max = 15000, message = "时间限制必须在500ms到15000ms之间") Integer timeLimit,
+                                 @NotNull(message = "内存限制不能为空") @Range(min = 128, max = 512, message = "内存限制必须在128MB到512MB之间") Integer memoryLimit) {
         if (problemService.getAuthorIdById(id) != StpUtil.getLoginIdAsInt()) {
             throw new ForbiddenException("无权编辑该题目");
         }

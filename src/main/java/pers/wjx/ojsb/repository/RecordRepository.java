@@ -21,4 +21,8 @@ public interface RecordRepository {
     Record getRecordById(Integer id);
 
     ArrayList<Record> getRecentRecords(Integer problemId, Integer userId, Integer limit);
+
+    ArrayList<Record> getPendingRecords();
+
+    boolean setJudgeResult(Integer id, JudgeResult judgeResult, Integer executeTime, Integer executeMemory);
 }

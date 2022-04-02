@@ -38,7 +38,7 @@ public class RecordController {
     public Integer addRecord(@NotNull(message = "提交者id不能为空") Integer userId,
                              @NotNull(message = "提交题号不能为空") Integer problemId,
                              @NotNull(message = "请选择提交语言") Language submitLanguage,
-                             @NotBlank(message = "提交代码不能为空") String code) {
+                             @NotBlank(message = "提交代码不能为空") String code) { // todo 设置提交代码的大小上限
         if (!accountService.existAccount(userId)) {
             throw new BadRequestException("提交至id不存在");
         }

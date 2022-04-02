@@ -37,7 +37,7 @@ public class RecordServiceImpl implements RecordService {
     private ProblemUserRepository problemUserRepository;
 
     @Value("${code-location}")
-    public String codeLocation;
+    private String codeLocation;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -94,11 +94,10 @@ public class RecordServiceImpl implements RecordService {
 
     @Override
     public String getCode(Integer id, Language submitLanguage, Integer codeLength) {
-        String location = "C:\\Users\\81050\\Desktop\\submit-code\\";
         String fileName = id + "." + submitLanguage.name().toLowerCase();
         char[] code = new char[codeLength];
         try {
-            FileReader reader = new FileReader(location + fileName);
+            FileReader reader = new FileReader(codeLocation + fileName);
             reader.read(code);
             reader.close();
         } catch (Exception ex) {

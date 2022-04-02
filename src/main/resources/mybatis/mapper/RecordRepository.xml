@@ -5,6 +5,11 @@
         insert into record(user_id, username, problem_id, submit_time, code_length, submit_language)
         values (#{userId}, #{username}, #{problemId}, #{submitTime}, #{codeLength}, #{submitLanguage})
     </insert>
+    <update id="setJudgeResult">
+        update record
+        set judge_result=#{judgeResult}, execute_time=#{executeTime}, execute_memory=#{executeMemory}
+        where id=#{id}
+    </update>
     <select id="getRecords" resultType="pers.wjx.ojsb.pojo.Record">
         select *
         from record
@@ -66,5 +71,10 @@
         where user_id = #{userId} and problem_id = #{problemId}
         order by submit_time desc
         limit #{limit}
+    </select>
+    <select id="getPendingRecords" resultType="pers.wjx.ojsb.pojo.Record">
+        select *
+        from record
+        where judge_result = 'PD'
     </select>
 </mapper>
