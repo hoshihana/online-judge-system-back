@@ -145,7 +145,7 @@ public class ProblemServiceImpl implements ProblemService {
             while ((zipEntry = zipInputStream.getNextEntry()) != null) {
                 // System.out.println(zipEntry.getName());
                 current++;
-                if (current > 32) {
+                if (current > 40) {
                     return null;
                 }
                 if (current % 2 == 1) {

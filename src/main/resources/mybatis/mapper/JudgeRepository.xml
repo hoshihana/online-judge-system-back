@@ -3,6 +3,16 @@
 <mapper namespace="pers.wjx.ojsb.repository.JudgeRepository">
     <insert id="addJudge">
         insert into judge(record_id, test_id)
-        values(#{recordId}, #{testId})
+        values (#{recordId}, #{testId})
     </insert>
+    <update id="updateJudge">
+        update judge
+        set judge_token=#{judgeToken},
+            judge_result=#{judgeResult},
+            executeTime=#{executeTime},
+            executeMemory=#{executeMemory}
+        where record_id = #{recordId}
+          and test_id = #{testId}
+          and (judge_result = 'PD' or judge_result = 'JD')
+    </update>
 </mapper>

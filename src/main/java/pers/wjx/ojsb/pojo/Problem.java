@@ -25,9 +25,9 @@ public class Problem {
 
     private String samples;
 
-    private Integer timeLimit;
+    private Integer timeLimit;  // (ms)
 
-    private Integer memoryLimit;
+    private Integer memoryLimit;    // (MB)
 
     private Boolean testSet;
 
