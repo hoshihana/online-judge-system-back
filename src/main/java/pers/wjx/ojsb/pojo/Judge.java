@@ -17,7 +17,7 @@ public class Judge {
 
     private JudgeResult judgeResult;
 
-    private Integer executeTime;
+    private Integer executeTime;    // ms
 
-    private Integer executeMemory;
+    private Integer executeMemory;  // KB
 }

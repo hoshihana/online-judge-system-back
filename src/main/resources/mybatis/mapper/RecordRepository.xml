@@ -7,8 +7,22 @@
     </insert>
     <update id="setJudgeResult">
         update record
-        set judge_result=#{judgeResult}, execute_time=#{executeTime}, execute_memory=#{executeMemory}
-        where id=#{id}
+        set judge_result=#{judgeResult},
+            execute_time=#{executeTime},
+            execute_memory=#{executeMemory}
+        where id = #{id}
+          and (judge_result = 'PD' or judge_result = 'JD')
+    </update>
+    <update id="setTestAmount">
+        update record
+        set test_amount=#{testAmount},
+            accepted_test_amount=0
+        where id = #{id}
+    </update>
+    <update id="increaseAcceptedTestAmount">
+        update record
+        set accepted_test_amount = accepted_test_amount + 1
+        where id = #{id}
     </update>
     <select id="getRecords" resultType="pers.wjx.ojsb.pojo.Record">
         select *
@@ -68,13 +82,15 @@
     <select id="getRecentRecords" resultType="pers.wjx.ojsb.pojo.Record">
         select *
         from record
-        where user_id = #{userId} and problem_id = #{problemId}
-        order by submit_time desc
-        limit #{limit}
+        where user_id = #{userId}
+          and problem_id = #{problemId}
+        order by id desc
+            limit #{limit}
     </select>
-    <select id="getPendingRecords" resultType="pers.wjx.ojsb.pojo.Record">
+    <select id="getRecordsByJudgeResult" resultType="pers.wjx.ojsb.pojo.Record">
         select *
         from record
-        where judge_result = 'PD'
+        where judge_result = #{judgeResult}
+        order by id
     </select>
 </mapper>

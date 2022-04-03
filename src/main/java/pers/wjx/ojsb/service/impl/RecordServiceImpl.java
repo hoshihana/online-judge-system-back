@@ -12,6 +12,7 @@ import pers.wjx.ojsb.repository.AccountRepository;
 import pers.wjx.ojsb.repository.ProblemRepository;
 import pers.wjx.ojsb.repository.RecordRepository;
 import pers.wjx.ojsb.repository.ProblemUserRepository;
+import pers.wjx.ojsb.service.JudgeService;
 import pers.wjx.ojsb.service.RecordService;
 
 import javax.annotation.Resource;
@@ -35,6 +36,9 @@ public class RecordServiceImpl implements RecordService {
 
     @Resource
     private ProblemUserRepository problemUserRepository;
+
+    @Resource
+    private JudgeService judgeService;
 
     @Value("${code-location}")
     private String codeLocation;
@@ -61,6 +65,7 @@ public class RecordServiceImpl implements RecordService {
             writer.write(code);
             writer.flush();
             writer.close();
+            judgeService.offerPendingRecord(record);
         } catch (Exception ex) {
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             ex.printStackTrace();

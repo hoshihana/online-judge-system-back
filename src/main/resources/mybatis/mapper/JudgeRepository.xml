@@ -15,4 +15,9 @@
           and test_id = #{testId}
           and (judge_result = 'PD' or judge_result = 'JD')
     </update>
+    <delete id="deleteJudgesByRecordId">
+        delete
+        from judge
+        where record_id = #{recordId}
+    </delete>
 </mapper>

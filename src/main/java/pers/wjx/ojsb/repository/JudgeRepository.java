@@ -10,5 +10,7 @@ public interface JudgeRepository {
 
     boolean addJudge(Integer recordId, Integer testId);
 
+    boolean deleteJudgesByRecordId(Integer recordId);
+
     boolean updateJudge(Judge judge);
 }

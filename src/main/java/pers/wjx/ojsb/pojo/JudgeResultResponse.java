@@ -33,11 +33,11 @@ public class JudgeResultResponse {
 
     private String token;
 
-    private Float time;
+    private Float time;     // s
 
-    private Float wallTime;
+    private Float wallTime; // s
 
-    private Float memory;
+    private Float memory;   // KB
 
     public void setStdout(String stdout) {
         if (stdout == null) {

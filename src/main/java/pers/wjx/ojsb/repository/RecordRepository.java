@@ -22,7 +22,11 @@ public interface RecordRepository {
 
     ArrayList<Record> getRecentRecords(Integer problemId, Integer userId, Integer limit);
 
-    ArrayList<Record> getPendingRecords();
+    ArrayList<Record> getRecordsByJudgeResult(JudgeResult judgeResult);
+
+    boolean setTestAmount(Integer id, Integer testAmount);
+
+    boolean increaseAcceptedTestAmount(Integer id);
 
     boolean setJudgeResult(Integer id, JudgeResult judgeResult, Integer executeTime, Integer executeMemory);
 }

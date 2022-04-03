@@ -29,7 +29,7 @@ class JudgeServiceImplTest {
 
     @Test
     void test() {
-        judgeService.checkJudge();
+
     }
 
     @Test
