@@ -51,6 +51,11 @@
             <artifactId>sa-token-spring-boot-starter</artifactId>
             <version>1.29.0</version>
         </dependency>
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>fastjson</artifactId>
+            <version>1.2.76</version>
+        </dependency>
     </dependencies>
 
     <build>

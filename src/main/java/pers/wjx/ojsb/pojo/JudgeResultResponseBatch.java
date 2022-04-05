@@ -10,5 +10,5 @@ import java.util.ArrayList;
 @AllArgsConstructor
 @NoArgsConstructor
 public class JudgeResultResponseBatch {
-    private ArrayList<JudgeResultResponse> submissions;
+    private JudgeResultResponse[] submissions;
 }

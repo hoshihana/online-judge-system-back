@@ -10,6 +10,8 @@ import java.util.ArrayList;
 @Service
 public interface RecordService {
 
+    void startJudgeService();
+
     Integer addRecord(Integer userId, Integer problemId, Language submitLanguage, String code);
 
     ArrayList<Record> getRecords(String problemId, String username, Language submitLanguage, JudgeResult judgeResult, String orderBy, Boolean asc, Integer pageIndex, Integer pageSize);

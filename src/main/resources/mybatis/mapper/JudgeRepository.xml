@@ -9,8 +9,8 @@
         update judge
         set judge_token=#{judgeToken},
             judge_result=#{judgeResult},
-            executeTime=#{executeTime},
-            executeMemory=#{executeMemory}
+            execute_time=#{executeTime},
+            execute_memory=#{executeMemory}
         where record_id = #{recordId}
           and test_id = #{testId}
           and (judge_result = 'PD' or judge_result = 'JD')
@@ -20,4 +20,9 @@
         from judge
         where record_id = #{recordId}
     </delete>
+    <select id="getJudgesByRecordId" resultType="pers.wjx.ojsb.pojo.Judge">
+        select *
+        from judge
+        where record_id = #{recordId}
+    </select>
 </mapper>

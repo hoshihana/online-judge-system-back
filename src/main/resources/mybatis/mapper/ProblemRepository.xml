@@ -29,6 +29,11 @@
         set test_set = 1
         where id = #{id}
     </update>
+    <update id="increaseAccept">
+        update problem
+        set accept = accept + 1
+        where id = #{id}
+    </update>
     <delete id="deleteProblemById">
         delete
         from problem
@@ -69,6 +74,11 @@
     </select>
     <select id="countProblemEntriesById" resultType="java.lang.Integer">
         select count(*)
+        from problem
+        where id = #{id}
+    </select>
+    <select id="getTestSet" resultType="java.lang.Boolean">
+        select test_set
         from problem
         where id = #{id}
     </select>

@@ -15,6 +15,7 @@ import pers.wjx.ojsb.repository.ProblemUserRepository;
 import pers.wjx.ojsb.service.JudgeService;
 import pers.wjx.ojsb.service.RecordService;
 
+import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -44,6 +45,13 @@ public class RecordServiceImpl implements RecordService {
     private String codeLocation;
 
     @Override
+    @PostConstruct
+    public void startJudgeService() {
+        judgeService.sendJudge();
+        judgeService.checkJudge();
+    }
+
+    @Override
     @Transactional(rollbackFor = Exception.class)
     public Integer addRecord(Integer userId, Integer problemId, Language submitLanguage, String code) {
         Record record = new Record();
@@ -60,7 +68,7 @@ public class RecordServiceImpl implements RecordService {
             }
             problemRepository.increaseSubmit(problemId);
             problemUserRepository.increaseSubmit(userId, problemId);
-            String fileName = record.getId() + "." + submitLanguage.name().toLowerCase();
+            String fileName = record.getId() + getCodeFileSuffix(submitLanguage);
             FileWriter writer = new FileWriter(codeLocation + fileName);
             writer.write(code);
             writer.flush();
@@ -99,7 +107,7 @@ public class RecordServiceImpl implements RecordService {
 
     @Override
     public String getCode(Integer id, Language submitLanguage, Integer codeLength) {
-        String fileName = id + "." + submitLanguage.name().toLowerCase();
+        String fileName = id + getCodeFileSuffix(submitLanguage);
         char[] code = new char[codeLength];
         try {
             FileReader reader = new FileReader(codeLocation + fileName);
@@ -115,5 +123,23 @@ public class RecordServiceImpl implements RecordService {
     @Override
     public ArrayList<Record> getRecentRecords(Integer problemId, Integer userId, Integer limit) {
         return recordRepository.getRecentRecords(problemId, userId, limit);
+    }
+
+    private String getCodeFileSuffix(Language language) {
+        switch (language) {
+            case C:
+                return ".c";
+            case CPP:
+            case CPP11:
+            case CPP14:
+            case CPP17:
+                return ".cpp";
+            case JAVA:
+                return ".java";
+            case PY2:
+            case PY3:
+                return ".py";
+        }
+        return "";
     }
 }

@@ -34,5 +34,9 @@ public interface ProblemRepository {
 
     boolean increaseSubmit(Integer id);
 
+    boolean increaseAccept(Integer id);
+
     boolean setTestSet(Integer id);
+
+    boolean getTestSet(Integer id);
 }

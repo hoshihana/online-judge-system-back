@@ -2,7 +2,6 @@ package pers.wjx.ojsb.service.impl;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.FileSystemResource;
-import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import pers.wjx.ojsb.pojo.Problem;
@@ -16,8 +15,6 @@ import pers.wjx.ojsb.service.ProblemService;
 import javax.annotation.Resource;
 import java.io.File;
 import java.io.FileInputStream;
-import java.net.MalformedURLException;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.regex.Pattern;
@@ -159,7 +156,7 @@ public class ProblemServiceImpl implements ProblemService {
                 }
             }
             zipInputStream.close();
-            if (current % 2 == 1) {
+            if (current == 0 || current % 2 == 1) {
                 return null;
             }
             File destFile = new File(testLocation + id + ".zip");
@@ -174,6 +171,11 @@ public class ProblemServiceImpl implements ProblemService {
             ex.printStackTrace();
             return null;
         }
+    }
+
+    @Override
+    public boolean checkTestSet(Integer id) {
+        return problemRepository.getTestSet(id);
     }
 
     @Override

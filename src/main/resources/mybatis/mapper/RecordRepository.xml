@@ -11,7 +11,7 @@
             execute_time=#{executeTime},
             execute_memory=#{executeMemory}
         where id = #{id}
-          and (judge_result = 'PD' or judge_result = 'JD')
+          and judge_result in ('PD', 'JD')
     </update>
     <update id="setTestAmount">
         update record

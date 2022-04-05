@@ -34,6 +34,8 @@ public interface ProblemService {
 
     TestFileInfo saveTestFile(Integer id, MultipartFile file);
 
+    boolean checkTestSet(Integer id);
+
     boolean deleteTestFile(Integer id);
 
     TestFileInfo getTestFileInfo(Integer id);

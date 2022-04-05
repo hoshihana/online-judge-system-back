@@ -2,9 +2,14 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="pers.wjx.ojsb.repository.ProblemUserRepository">
     <insert id="increaseSubmit">
-        insert into problem_user(user_id, problem_id, submit)
-        values (#{userId}, #{problemId}, 1)
+        insert into problem_user(user_id, problem_id, submit, accept)
+        values (#{userId}, #{problemId}, 1, 0)
         on duplicate key update submit = submit + 1;
+    </insert>
+    <insert id="increaseAccept">
+        insert into problem_user(user_id, problem_id, submit, accept)
+        values (#{userId}, #{problemId}, 1, 1)
+        on duplicate key update accept = accept + 1;
     </insert>
     <select id="getProblemUserRelation" resultType="pers.wjx.ojsb.pojo.ProblemUserRelation">
         select *

@@ -2,6 +2,7 @@ package pers.wjx.ojsb.controller;
 
 import cn.dev33.satoken.annotation.SaCheckLogin;
 import cn.dev33.satoken.stp.StpUtil;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import pers.wjx.ojsb.exception.BadRequestException;
@@ -17,6 +18,7 @@ import javax.annotation.Resource;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 
 @RestController
@@ -33,17 +35,26 @@ public class RecordController {
     @Resource
     private RecordService recordService;
 
+    @Value("${max-code-length}")
+    private Integer maxCodeLength;
+
     @SaCheckLogin
     @PostMapping("")
     public Integer addRecord(@NotNull(message = "提交者id不能为空") Integer userId,
                              @NotNull(message = "提交题号不能为空") Integer problemId,
                              @NotNull(message = "请选择提交语言") Language submitLanguage,
-                             @NotBlank(message = "提交代码不能为空") String code) { // todo 设置提交代码的大小上限
+                             @NotBlank(message = "提交代码不能为空") String code) {
         if (!accountService.existAccount(userId)) {
-            throw new BadRequestException("提交至id不存在");
+            throw new BadRequestException("提交者id不存在");
         }
         if (!problemService.existProblem(problemId)) {
             throw new BadRequestException("提交题号不存在");
+        }
+        if(!problemService.checkTestSet(problemId)) {
+            throw new BadRequestException("改题目尚未配置测试点");
+        }
+        if(code.getBytes(StandardCharsets.UTF_8).length > maxCodeLength) {
+            throw new BadRequestException("代码长度过长，不能超过" + maxCodeLength + "字节");
         }
         Integer id = recordService.addRecord(userId, problemId, submitLanguage, code);
         if (id == null) {

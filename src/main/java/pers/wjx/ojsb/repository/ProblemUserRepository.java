@@ -10,6 +10,8 @@ public interface ProblemUserRepository {
 
     boolean increaseSubmit(Integer userId, Integer problemId);
 
+    boolean increaseAccept(Integer userId, Integer problemId);
+
     ProblemUserRelation getProblemUserRelation(Integer userId, Integer problemId);
 
     Integer countTriedUserByProblemId(Integer problemId);
