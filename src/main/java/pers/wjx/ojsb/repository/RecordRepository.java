@@ -29,4 +29,6 @@ public interface RecordRepository {
     boolean increaseAcceptedTestAmount(Integer id);
 
     boolean setJudgeResult(Integer id, JudgeResult judgeResult, Integer executeTime, Integer executeMemory);
+
+    boolean setCompileOutput(Integer id, String compileOutput);
 }

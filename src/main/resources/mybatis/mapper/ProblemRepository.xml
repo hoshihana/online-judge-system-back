@@ -82,5 +82,10 @@
         from problem
         where id = #{id}
     </select>
+    <select id="getMemoryLimit" resultType="java.lang.Integer">
+        select memory_limit
+        from problem
+        where id = #{id}
+    </select>
 
 </mapper>

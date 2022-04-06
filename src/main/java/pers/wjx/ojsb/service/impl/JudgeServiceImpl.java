@@ -1,8 +1,11 @@
 package pers.wjx.ojsb.service.impl;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.ResponseErrorHandler;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import pers.wjx.ojsb.pojo.*;
 import pers.wjx.ojsb.pojo.enumeration.JudgeResult;
@@ -117,6 +120,17 @@ public class JudgeServiceImpl implements JudgeService {
             }
             pendingRecordQueue.notify();
         }
+        restTemplate.setErrorHandler(new ResponseErrorHandler() {
+            @Override
+            public boolean hasError(ClientHttpResponse response) throws IOException {
+                return response.getRawStatusCode() != 200 && response.getRawStatusCode() != 201;
+            }
+
+            @Override
+            public void handleError(ClientHttpResponse response) throws IOException {
+                throw new RestClientException(response.getRawStatusCode() + "");
+            }
+        });
         while (true) {
             // System.out.println("sendJudge...");
             synchronized (pendingRecordQueue) {
@@ -177,13 +191,9 @@ public class JudgeServiceImpl implements JudgeService {
                     for (JudgeResponse judgeResponse : judgeResponses) {
                         Judge judge = pendingJudgeQueue.poll();
                         if (judgeResponse.token == null) {
-                            if (judgeResponse.getError().equals("queue is full")) {  // todo 队列已满验证效果待检验
-                                pendingJudgeQueue.offer(judge); // 评测机队列已满，子任务重新放入等待队列
-                            } else {
                                 judge.setJudgeResult(JudgeResult.SE);   // 发送错误，子任务无法送入评测机，直接设置为SE
                                 judgeRepository.updateJudge(judge);
                                 recordRepository.setJudgeResult(judge.getRecordId(), judge.getJudgeResult(), judge.getExecuteTime(), judge.getExecuteMemory());
-                            }
                         } else {
                             judge.setJudgeToken(judgeResponse.getToken());
                             judge.setJudgeResult(JudgeResult.JD);
@@ -194,11 +204,13 @@ public class JudgeServiceImpl implements JudgeService {
                             }
                         }
                     }
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                    recordRepository.setJudgeResult(currentRecord.getId(), JudgeResult.SE, null, null);
-                    judgeRepository.deleteJudgesByRecordId(currentRecord.getId());
-                    pendingJudgeQueue.clear();
+                } catch (RestClientException ex) {
+                    if(!ex.getMessage().equals("503")) {    // 发生错误且队列未满（队满会返回状态码503）
+                        ex.printStackTrace();
+                        recordRepository.setJudgeResult(currentRecord.getId(), JudgeResult.SE, null, null);
+                        judgeRepository.deleteJudgesByRecordId(currentRecord.getId());
+                        pendingJudgeQueue.clear();
+                    }
                 }
                 if (pendingJudgeQueue.isEmpty()) {
                     break;
@@ -249,6 +261,7 @@ public class JudgeServiceImpl implements JudgeService {
                 JudgeResultResponseBatch judgeResultResponseBatch = restTemplate.getForObject(judgeBaseUrl + "/submissions/batch?base64_encoded=true&tokens=" +
                         String.join(",", tokens) + "&fields=" + judgeResultResponseFields, JudgeResultResponseBatch.class);
                 List<JudgeResultResponse> judgeResultResponses = Arrays.asList(judgeResultResponseBatch.getSubmissions());
+                // System.out.println(judgeResultResponses);
                 for (JudgeResultResponse judgeResultResponse : judgeResultResponses) {
                     Judge judge = checkingJudgeQueue.poll();
                     if (getJudgeResult(judgeResultResponse.getStatus().getId()) == JudgeResult.JD) {
@@ -276,6 +289,15 @@ public class JudgeServiceImpl implements JudgeService {
                                 problemRepository.increaseAccept(record.getProblemId());
                                 problemUserRepository.increaseAccept(record.getUserId(), record.getProblemId());
                             }
+                        } else if (judge.getJudgeResult() == JudgeResult.CE) {
+                            recordRepository.setCompileOutput(judge.getRecordId(), judgeResultResponse.getCompileOutput());
+                            recordRepository.setJudgeResult(judge.getRecordId(), JudgeResult.CE, null, null);
+                        } else if (judge.getJudgeResult() == JudgeResult.RE){
+                                Record record = recordRepository.getRecordById(judge.getRecordId());
+                                if(judge.getExecuteMemory() >= problemRepository.getMemoryLimit(record.getProblemId()) * 1000) {
+                                    judge.setJudgeResult(JudgeResult.MLE);
+                                }
+                                recordRepository.setJudgeResult(judge.getRecordId(), judge.getJudgeResult(), judge.getExecuteTime(), judge.getExecuteMemory());
                         } else {
                             recordRepository.setJudgeResult(judge.getRecordId(), judge.getJudgeResult(), judge.getExecuteTime(), judge.getExecuteMemory());
                         }
@@ -413,7 +435,7 @@ public class JudgeServiceImpl implements JudgeService {
             case 10:
             case 11:
             case 12:
-                return JudgeResult.RE;  // todo 设定MLE
+                return JudgeResult.RE;
             case 13:
             case 14:
             default:

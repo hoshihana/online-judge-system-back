@@ -39,4 +39,6 @@ public interface ProblemRepository {
     boolean setTestSet(Integer id);
 
     boolean getTestSet(Integer id);
+
+    Integer getMemoryLimit(Integer id);
 }

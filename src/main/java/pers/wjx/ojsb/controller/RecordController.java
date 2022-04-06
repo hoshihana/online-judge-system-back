@@ -7,6 +7,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import pers.wjx.ojsb.exception.BadRequestException;
 import pers.wjx.ojsb.exception.InternalServerErrorException;
+import pers.wjx.ojsb.exception.NotFoundException;
 import pers.wjx.ojsb.pojo.Record;
 import pers.wjx.ojsb.pojo.enumeration.JudgeResult;
 import pers.wjx.ojsb.pojo.enumeration.Language;
@@ -87,14 +88,37 @@ public class RecordController {
 
     @SaCheckLogin
     @GetMapping("/{id}")
-    public Record getRecords(@PathVariable Integer id) {
-        return recordService.getRecordById(id);
+    public Record getRecord(@PathVariable Integer id) {
+        Record record = recordService.getRecordById(id);
+        if(record == null) {
+            throw new NotFoundException("该记录不存在");
+        } else {
+            return record;
+        }
     }
 
     @SaCheckLogin
     @GetMapping("/{id}/code")
     public String getCode(@PathVariable Integer id, Language submitLanguage, Integer codeLength) {
+        Record record = recordService.getRecordById(id);
+        if(record == null) {
+            throw new NotFoundException("该记录不存在");
+        }
         return recordService.getCode(id, submitLanguage, codeLength);
+    }
+
+    @SaCheckLogin
+    @GetMapping("/{id}/compileOutput")
+    public String getCompileOutput(@PathVariable Integer id) {
+        Record record = recordService.getRecordById(id);
+        if(record == null) {
+            throw new NotFoundException("该记录不存在");
+        }
+        if(record.getCompileOutput() == null) {
+            throw new NotFoundException("无编译信息");
+        } else {
+            return record.getCompileOutput();
+        }
     }
 
     @SaCheckLogin

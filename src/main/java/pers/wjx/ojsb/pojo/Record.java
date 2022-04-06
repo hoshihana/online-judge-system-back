@@ -41,4 +41,6 @@ public class Record {
     @JsonIgnore
     private Integer acceptedTestAmount;
 
+    @JsonIgnore
+    private String compileOutput;
 }

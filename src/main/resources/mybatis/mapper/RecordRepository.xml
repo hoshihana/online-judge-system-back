@@ -24,6 +24,12 @@
         set accepted_test_amount = accepted_test_amount + 1
         where id = #{id}
     </update>
+    <update id="setCompileOutput">
+        update record
+        set compile_output = #{compileOutput}
+        where id = #{id}
+            and compile_output is null
+    </update>
     <select id="getRecords" resultType="pers.wjx.ojsb.pojo.Record">
         select *
         from record
