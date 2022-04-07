@@ -73,7 +73,7 @@ public class ProblemController {
     public Problem getProblemById(@PathVariable Integer id) {
         Problem problem = problemService.getProblemById(id);
         if (problem == null) {
-            throw new NotFoundException("题号不存在");
+            throw new NotFoundException("题目不存在");
         } else {
             return problem;
         }

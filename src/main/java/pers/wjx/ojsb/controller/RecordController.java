@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import pers.wjx.ojsb.exception.BadRequestException;
+import pers.wjx.ojsb.exception.ForbiddenException;
 import pers.wjx.ojsb.exception.InternalServerErrorException;
 import pers.wjx.ojsb.exception.NotFoundException;
 import pers.wjx.ojsb.pojo.Record;
@@ -124,6 +125,9 @@ public class RecordController {
     @SaCheckLogin
     @GetMapping("/recent")
     public ArrayList<Record> getRecentRecords(Integer problemId, Integer userId, @Min(value = 0, message = "返回记录条数必须为非负数") Integer limit) {
+        if(StpUtil.getLoginIdAsInt() != userId) {
+            throw new ForbiddenException("无权获取该用户最近提交记录");
+        }
         return recordService.getRecentRecords(problemId, userId, limit);
     }
 }
