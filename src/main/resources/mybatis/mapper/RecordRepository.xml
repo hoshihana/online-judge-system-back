@@ -2,8 +2,8 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="pers.wjx.ojsb.repository.RecordRepository">
     <insert id="addRecord" useGeneratedKeys="true" keyProperty="id">
-        insert into record(user_id, username, problem_id, submit_time, code_length, submit_language)
-        values (#{userId}, #{username}, #{problemId}, #{submitTime}, #{codeLength}, #{submitLanguage})
+        insert into record(user_id, username, problem_id, contest_id, submit_time, code_length, submit_language)
+        values (#{userId}, #{username}, #{problemId}, #{contestId}, #{submitTime}, #{codeLength}, #{submitLanguage})
     </insert>
     <update id="setJudgeResult">
         update record
@@ -30,10 +30,16 @@
         where id = #{id}
             and compile_output is null
     </update>
+    <update id="setVisibilityByProblemId">
+        update record
+        set visibility = #{visibility}
+        where problem_id = #{problemId}
+    </update>
     <select id="getRecords" resultType="pers.wjx.ojsb.pojo.Record">
         select *
         from record
         where username like concat('%', #{username}, '%')
+            and visibility = #{visibility}
         <if test="problemId != null">
             and problem_id = #{problemId}
         </if>
@@ -70,6 +76,7 @@
         select count(*)
         from record
         where username like concat('%', #{username}, '%')
+            and visibility = #{visibility}
         <if test="problemId != null">
             and problem_id = #{problemId}
         </if>

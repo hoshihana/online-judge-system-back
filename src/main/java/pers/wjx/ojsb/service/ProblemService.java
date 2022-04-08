@@ -6,6 +6,7 @@ import pers.wjx.ojsb.pojo.Problem;
 import pers.wjx.ojsb.pojo.ProblemEntry;
 import pers.wjx.ojsb.pojo.TestFileInfo;
 import pers.wjx.ojsb.pojo.TryPassAmountPair;
+import pers.wjx.ojsb.pojo.enumeration.Visibility;
 
 import java.util.ArrayList;
 
@@ -20,9 +21,9 @@ public interface ProblemService {
 
     Problem getProblemById(Integer id);
 
-    Integer addProblem(Integer authorId, String name, String description, String inputFormat, String outputFormat, String explanation, String samples, Integer timeLimit, Integer memoryLimit);
+    Integer addProblem(Integer authorId, String name, String description, String inputFormat, String outputFormat, String explanation, String samples, Integer timeLimit, Integer memoryLimit, Visibility visibility);
 
-    boolean updateProblem(Integer id, String name, String description, String inputFormat, String outputFormat, String explanation, String samples, Integer timeLimit, Integer memoryLimit);
+    boolean updateProblem(Integer id, String name, String description, String inputFormat, String outputFormat, String explanation, String samples, Integer timeLimit, Integer memoryLimit, Visibility visibility);
 
     Integer getAuthorIdById(Integer id);
 

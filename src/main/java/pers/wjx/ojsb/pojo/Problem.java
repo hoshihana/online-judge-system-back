@@ -3,6 +3,7 @@ package pers.wjx.ojsb.pojo;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import pers.wjx.ojsb.pojo.enumeration.Visibility;
 
 @Data
 @AllArgsConstructor
@@ -12,6 +13,8 @@ public class Problem {
     private Integer id;
 
     private Integer authorId;
+
+    private String authorUsername;
 
     private String name;
 
@@ -31,7 +34,7 @@ public class Problem {
 
     private Boolean testSet;
 
-    private Integer visibility; //todo: 处理可见性问题
+    private Visibility visibility;
 
     private Integer submit;
 

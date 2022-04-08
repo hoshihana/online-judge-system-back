@@ -4,6 +4,7 @@ import org.springframework.stereotype.Service;
 import pers.wjx.ojsb.pojo.Record;
 import pers.wjx.ojsb.pojo.enumeration.JudgeResult;
 import pers.wjx.ojsb.pojo.enumeration.Language;
+import pers.wjx.ojsb.pojo.enumeration.Visibility;
 
 import java.util.ArrayList;
 
@@ -12,11 +13,11 @@ public interface RecordService {
 
     void startJudgeService();
 
-    Integer addRecord(Integer userId, Integer problemId, Language submitLanguage, String code);
+    Integer addRecord(Integer userId, Integer problemId, Integer contestId, Visibility visibility, Language submitLanguage, String code);
 
-    ArrayList<Record> getRecords(String problemId, String username, Language submitLanguage, JudgeResult judgeResult, String orderBy, Boolean asc, Integer pageIndex, Integer pageSize);
+    ArrayList<Record> getPublicRecords(String problemId, String username, Language submitLanguage, JudgeResult judgeResult, String orderBy, Boolean asc, Integer pageIndex, Integer pageSize);
 
-    Integer countRecords(String problemId, String username, Language submitLanguage, JudgeResult judgeResult);
+    Integer countPublicRecords(String problemId, String username, Language submitLanguage, JudgeResult judgeResult);
 
     Record getRecordById(Integer id);
 

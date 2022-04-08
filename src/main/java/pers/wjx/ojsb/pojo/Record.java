@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import pers.wjx.ojsb.pojo.enumeration.JudgeResult;
 import pers.wjx.ojsb.pojo.enumeration.Language;
+import pers.wjx.ojsb.pojo.enumeration.Visibility;
 
 import java.util.Date;
 
@@ -22,6 +23,8 @@ public class Record {
 
     private Integer problemId;
 
+    private Integer contestId;
+
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",timezone="GMT+8")
     private Date submitTime;
 
@@ -30,6 +33,8 @@ public class Record {
     private Language submitLanguage;
 
     private JudgeResult judgeResult;
+
+    private Visibility visibility;
 
     private Integer executeTime; // (ms)
 

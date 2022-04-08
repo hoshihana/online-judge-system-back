@@ -8,8 +8,11 @@ import pers.wjx.ojsb.pojo.Problem;
 import pers.wjx.ojsb.pojo.ProblemEntry;
 import pers.wjx.ojsb.pojo.TestFileInfo;
 import pers.wjx.ojsb.pojo.TryPassAmountPair;
+import pers.wjx.ojsb.pojo.enumeration.Visibility;
+import pers.wjx.ojsb.repository.AccountRepository;
 import pers.wjx.ojsb.repository.ProblemRepository;
 import pers.wjx.ojsb.repository.ProblemUserRepository;
+import pers.wjx.ojsb.repository.RecordRepository;
 import pers.wjx.ojsb.service.ProblemService;
 
 import javax.annotation.Resource;
@@ -29,6 +32,12 @@ public class ProblemServiceImpl implements ProblemService {
 
     @Resource
     private ProblemUserRepository problemUserRepository;
+
+    @Resource
+    private RecordRepository recordRepository;
+
+    @Resource
+    private AccountRepository accountRepository;
 
     @Value("${test-location}")
     public String testLocation;
@@ -80,9 +89,10 @@ public class ProblemServiceImpl implements ProblemService {
     }
 
     @Override
-    public Integer addProblem(Integer authorId, String name, String description, String inputFormat, String outputFormat, String explanation, String samples, Integer timeLimit, Integer memoryLimit) {
+    public Integer addProblem(Integer authorId, String name, String description, String inputFormat, String outputFormat, String explanation, String samples, Integer timeLimit, Integer memoryLimit, Visibility visibility) {
         Problem problem = new Problem();
         problem.setAuthorId(authorId);
+        problem.setAuthorUsername(accountRepository.getUsernameById(authorId));
         problem.setName(name);
         problem.setDescription(description);
         problem.setInputFormat(inputFormat);
@@ -91,6 +101,7 @@ public class ProblemServiceImpl implements ProblemService {
         problem.setSamples(samples);
         problem.setTimeLimit(timeLimit);
         problem.setMemoryLimit(memoryLimit);
+        problem.setVisibility(visibility);
         if (problemRepository.addProblem(problem)) {
             return problem.getId();
         } else {
@@ -99,7 +110,7 @@ public class ProblemServiceImpl implements ProblemService {
     }
 
     @Override
-    public boolean updateProblem(Integer id, String name, String description, String inputFormat, String outputFormat, String explanation, String samples, Integer timeLimit, Integer memoryLimit) {
+    public boolean updateProblem(Integer id, String name, String description, String inputFormat, String outputFormat, String explanation, String samples, Integer timeLimit, Integer memoryLimit, Visibility visibility) {
         Problem problem = new Problem();
         problem.setId(id);
         problem.setName(name);
@@ -110,6 +121,8 @@ public class ProblemServiceImpl implements ProblemService {
         problem.setSamples(samples);
         problem.setTimeLimit(timeLimit);
         problem.setMemoryLimit(memoryLimit);
+        problem.setVisibility(visibility);
+        recordRepository.setVisibilityByProblemId(id, visibility);
         return problemRepository.updateProblem(problem);
     }
 
@@ -120,6 +133,10 @@ public class ProblemServiceImpl implements ProblemService {
 
     @Override
     public boolean deleteProblemById(Integer id) {
+        File testFile = new File(testLocation + id + ".zip");
+        if(testFile.isFile() && testFile.exists()) {
+            testFile.delete();
+        }
         return problemRepository.deleteProblemById(id);
     }
 

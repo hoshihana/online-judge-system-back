@@ -20,11 +20,12 @@ import pers.wjx.ojsb.pojo.Problem;
 import pers.wjx.ojsb.pojo.ProblemUserRelation;
 import pers.wjx.ojsb.pojo.TestFileInfo;
 import pers.wjx.ojsb.pojo.TryPassAmountPair;
+import pers.wjx.ojsb.pojo.enumeration.Visibility;
+import pers.wjx.ojsb.service.AccountService;
 import pers.wjx.ojsb.service.ProblemService;
 import pers.wjx.ojsb.service.ProblemUserService;
 
 import javax.annotation.Resource;
-import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
 @RestController
@@ -38,13 +39,17 @@ public class ProblemController {
     @Resource
     private ProblemUserService problemUserService;
 
+    @Resource
+    private AccountService accountService;
+
     @SaCheckLogin
     @PostMapping("")    // 创建成功返回题目id
     public Integer addProblem(@Length(min = 1, max = 40, message = "题目名长度要在1到40之间") String name,
                               String description, String inputFormat, String outputFormat, String explanation, String samples,
                               @NotNull(message = "时间限制不能为空") @Range(min = 500, max = 15000, message = "时间限制必须在500ms到15000ms之间") Integer timeLimit,
-                              @NotNull(message = "内存限制不能为空") @Range(min = 128, max = 512, message = "内存限制必须在128MB到512MB之间") Integer memoryLimit) {
-        Integer id = problemService.addProblem(StpUtil.getLoginIdAsInt(), name, description, inputFormat, outputFormat, explanation, samples, timeLimit, memoryLimit);
+                              @NotNull(message = "内存限制不能为空") @Range(min = 128, max = 512, message = "内存限制必须在128MB到512MB之间") Integer memoryLimit,
+                              @NotNull(message = "题目状态不能为空")Visibility visibility) {
+        Integer id = problemService.addProblem(StpUtil.getLoginIdAsInt(), name, description, inputFormat, outputFormat, explanation, samples, timeLimit, memoryLimit, visibility);
         if (id != null) {
             return id;
         } else {
@@ -57,11 +62,12 @@ public class ProblemController {
     public Integer updateProblem(@PathVariable Integer id, @Length(min = 1, max = 40, message = "题目名长度要在1到40之间") String name,
                                  String description, String inputFormat, String outputFormat, String explanation, String samples,
                                  @NotNull(message = "时间限制不能为空") @Range(min = 500, max = 15000, message = "时间限制必须在500ms到15000ms之间") Integer timeLimit,
-                                 @NotNull(message = "内存限制不能为空") @Range(min = 128, max = 512, message = "内存限制必须在128MB到512MB之间") Integer memoryLimit) {
+                                 @NotNull(message = "内存限制不能为空") @Range(min = 128, max = 512, message = "内存限制必须在128MB到512MB之间") Integer memoryLimit,
+                                 @NotNull(message = "题目状态不能为空") Visibility visibility) {
         if (problemService.getAuthorIdById(id) != StpUtil.getLoginIdAsInt()) {
             throw new ForbiddenException("无权编辑该题目");
         }
-        if (problemService.updateProblem(id, name, description, inputFormat, outputFormat, explanation, samples, timeLimit, memoryLimit)) {
+        if (problemService.updateProblem(id, name, description, inputFormat, outputFormat, explanation, samples, timeLimit, memoryLimit, visibility)) {
             return id;
         } else {
             throw new InternalServerErrorException("题目编辑失败");
@@ -77,6 +83,13 @@ public class ProblemController {
         } else {
             return problem;
         }
+    }
+
+    @SaCheckLogin
+    @PostMapping("/{id}/exists")
+    public Boolean existsProblem(@PathVariable Integer id) {
+        Problem problem = problemService.getProblemById(id);
+        return problem != null;
     }
 
     @SaCheckLogin
