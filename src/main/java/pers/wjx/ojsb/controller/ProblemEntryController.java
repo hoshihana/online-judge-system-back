@@ -27,16 +27,16 @@ public class ProblemEntryController {
 
     @SaCheckLogin
     @GetMapping("/public")
-    public ArrayList<ProblemEntry> getProblemEntriesByKey(@Length(max = 40, message = "搜索关键字长度要在0到40之间") String key,
+    public ArrayList<ProblemEntry> getPublicProblemEntriesByKey(@Length(max = 40, message = "搜索关键字长度要在0到40之间") String key,
                                                          @NotNull(message = "查询方式不能为空") boolean byId,
                                                          @Min(value = 1, message = "页码不能小于1") Integer pageIndex,
                                                          @Min(value = 1, message = "页面大小不能小于1") Integer pageSize) {
-        return problemService.getProblemEntriesByKey(key == null ? "" : key, byId, pageIndex, pageSize);
+        return problemService.getPublicProblemEntriesByKey(key == null ? "" : key, byId, pageIndex, pageSize);
     }
 
     @SaCheckLogin
     @GetMapping("/public/amount")
-    public Integer countProblemEntriesByKey(@Length(max = 40, message = "搜索关键字长度要在0到40之间") String key,
+    public Integer countPublicProblemEntriesByKey(@Length(max = 40, message = "搜索关键字长度要在0到40之间") String key,
                                      @NotNull(message = "查询方式不能为空") boolean byId) {
         return problemService.countProblemEntriesByKey(key == null ? "" : key, byId);
     }

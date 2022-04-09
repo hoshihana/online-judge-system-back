@@ -46,22 +46,22 @@
         where id = #{id}
     </select>
     <select id="getProblemEntriesByAuthorId" resultType="pers.wjx.ojsb.pojo.ProblemEntry">
-        select id, name, submit, accept
+        select id, name, visibility, submit, accept
         from problem
         where author_id = #{authorId}
         order by id desc
             limit #{startIndex}, #{pageSize}
     </select>
-    <select id="getProblemEntriesByName" resultType="pers.wjx.ojsb.pojo.ProblemEntry">
-        select id, name, submit, accept
+    <select id="getPublicProblemEntriesByName" resultType="pers.wjx.ojsb.pojo.ProblemEntry">
+        select id, name, visibility, submit, accept
         from problem
-        where `name` like concat('%', #{name}, '%')
+        where visibility = 'PUBLIC' and `name` like concat('%', #{name}, '%')
             limit #{startIndex}, #{pageSize}
     </select>
-    <select id="countProblemEntriesByName" resultType="java.lang.Integer">
+    <select id="countPublicProblemEntriesByName" resultType="java.lang.Integer">
         select count(*)
         from problem
-        where `name` like concat('%', #{name}, '%')
+        where visibility = 'PUBLIC' and `name` like concat('%', #{name}, '%')
     </select>
     <select id="getAuthorIdById" resultType="java.lang.Integer">
         select author_id
@@ -72,11 +72,6 @@
         select count(*)
         from problem
         where author_id = #{authorId}
-    </select>
-    <select id="countProblemEntriesById" resultType="java.lang.Integer">
-        select count(*)
-        from problem
-        where id = #{id}
     </select>
     <select id="getTestSet" resultType="java.lang.Boolean">
         select test_set

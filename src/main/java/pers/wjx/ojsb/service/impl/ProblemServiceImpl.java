@@ -4,10 +4,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import pers.wjx.ojsb.pojo.Problem;
-import pers.wjx.ojsb.pojo.ProblemEntry;
-import pers.wjx.ojsb.pojo.TestFileInfo;
-import pers.wjx.ojsb.pojo.TryPassAmountPair;
+import pers.wjx.ojsb.pojo.*;
 import pers.wjx.ojsb.pojo.enumeration.Visibility;
 import pers.wjx.ojsb.repository.AccountRepository;
 import pers.wjx.ojsb.repository.ProblemRepository;
@@ -43,18 +40,18 @@ public class ProblemServiceImpl implements ProblemService {
     public String testLocation;
 
     @Override
-    public ArrayList<ProblemEntry> getProblemEntriesByKey(String key, boolean byId, Integer pageIndex, Integer pageSize) {
+    public ArrayList<ProblemEntry> getPublicProblemEntriesByKey(String key, boolean byId, Integer pageIndex, Integer pageSize) {
         key = key.trim();
         ArrayList<ProblemEntry> problemEntries = new ArrayList<>();
         if (byId) {
             if (Pattern.matches("^\\d{1,8}$", key)) {
                 Problem problem = problemRepository.getProblemById(Integer.valueOf(key));
-                if (problem != null) {
-                    problemEntries.add(new ProblemEntry(problem.getId(), problem.getName(), problem.getSubmit(), problem.getAccept()));
+                if (problem != null && problem.getVisibility() == Visibility.PUBLIC) {
+                    problemEntries.add(new ProblemEntry(problem.getId(), problem.getName(), problem.getVisibility(), problem.getSubmit(), problem.getAccept()));
                 }
             }
         } else {
-            problemEntries = problemRepository.getProblemEntriesByName(key, (pageIndex - 1) * pageSize, pageSize);
+            problemEntries = problemRepository.getPublicProblemEntriesByName(key, (pageIndex - 1) * pageSize, pageSize);
         }
         return problemEntries;
     }
@@ -63,13 +60,14 @@ public class ProblemServiceImpl implements ProblemService {
     public Integer countProblemEntriesByKey(String key, boolean byId) {
         key = key.trim();
         if (byId) {
-            if (Pattern.matches("^\\d{1,8}$", key) && problemRepository.getProblemById(Integer.valueOf(key)) != null) {
-                return 1;
+            if (Pattern.matches("^\\d{1,8}$", key)) {
+                Problem problem = problemRepository.getProblemById(Integer.valueOf(key));
+                return problem != null && problem.getVisibility() == Visibility.PUBLIC ? 1 : 0;
             } else {
                 return 0;
             }
         } else {
-            return problemRepository.countProblemEntriesByName(key);
+            return problemRepository.countPublicProblemEntriesByName(key);
         }
     }
 
@@ -81,6 +79,11 @@ public class ProblemServiceImpl implements ProblemService {
     @Override
     public Integer countProblemEntriesByAuthorId(Integer authorId) {
         return problemRepository.countProblemEntriesByAuthorId(authorId);
+    }
+
+    @Override
+    public ProblemUserRelation getProblemUserRelation(Integer userId, Integer problemId) {
+        return problemUserRepository.getProblemUserRelation(userId, problemId);
     }
 
     @Override
@@ -122,7 +125,16 @@ public class ProblemServiceImpl implements ProblemService {
         problem.setTimeLimit(timeLimit);
         problem.setMemoryLimit(memoryLimit);
         problem.setVisibility(visibility);
-        recordRepository.setVisibilityByProblemId(id, visibility);
+        if(visibility == Visibility.PUBLIC) {
+            recordRepository.setRecordsPersonalByProblemId(id, false);
+            recordRepository.setContestRecordsPersonalByProblemId(id, false);
+        } else if(visibility == Visibility.HIDDEN) {
+            recordRepository.setRecordsPersonalByProblemId(id, true);
+            recordRepository.setContestRecordsPersonalByProblemId(id, false);
+        } else {
+            recordRepository.setRecordsPersonalByProblemId(id, true);
+            recordRepository.setContestRecordsPersonalByProblemId(id, true);
+        }
         return problemRepository.updateProblem(problem);
     }
 
@@ -138,11 +150,6 @@ public class ProblemServiceImpl implements ProblemService {
             testFile.delete();
         }
         return problemRepository.deleteProblemById(id);
-    }
-
-    @Override
-    public boolean existProblem(Integer id) {
-        return problemRepository.countProblemEntriesById(id) > 0;
     }
 
     @Override
@@ -188,11 +195,6 @@ public class ProblemServiceImpl implements ProblemService {
             ex.printStackTrace();
             return null;
         }
-    }
-
-    @Override
-    public boolean checkTestSet(Integer id) {
-        return problemRepository.getTestSet(id);
     }
 
     @Override

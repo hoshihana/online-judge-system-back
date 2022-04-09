@@ -2,12 +2,12 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="pers.wjx.ojsb.repository.ContestRepository">
     <insert id="addContest" useGeneratedKeys="true" keyProperty="id">
-        insert into contest(author_id, author_username, name, type , description, password, start_time, end_time)
-        values (#{authorId}, #{authorUsername}, #{name}, #{type}, #{description}, #{password}, #{startTime}, #{endTime})
+        insert into contest(author_id, author_username, name, type , description, password_set, password, start_time, end_time)
+        values (#{authorId}, #{authorUsername}, #{name}, #{type}, #{description}, #{passwordSet}, #{password}, #{startTime}, #{endTime})
     </insert>
     <update id="updateContestDetail">
         update contest
-        set name = #{name}, type = #{type}, description = #{description}, password = #{password}
+        set name = #{name}, type = #{type}, description = #{description}, password_set = #{passwordSet}, password = #{password}
         where id = #{id}
     </update>
     <update id="setContestEndTime">

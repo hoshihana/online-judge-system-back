@@ -21,9 +21,7 @@ import pers.wjx.ojsb.pojo.ProblemUserRelation;
 import pers.wjx.ojsb.pojo.TestFileInfo;
 import pers.wjx.ojsb.pojo.TryPassAmountPair;
 import pers.wjx.ojsb.pojo.enumeration.Visibility;
-import pers.wjx.ojsb.service.AccountService;
 import pers.wjx.ojsb.service.ProblemService;
-import pers.wjx.ojsb.service.ProblemUserService;
 
 import javax.annotation.Resource;
 import javax.validation.constraints.NotNull;
@@ -35,12 +33,6 @@ public class ProblemController {
 
     @Resource
     private ProblemService problemService;
-
-    @Resource
-    private ProblemUserService problemUserService;
-
-    @Resource
-    private AccountService accountService;
 
     @SaCheckLogin
     @PostMapping("")    // 创建成功返回题目id
@@ -59,16 +51,20 @@ public class ProblemController {
 
     @SaCheckLogin
     @PatchMapping("/{id}")
-    public Integer updateProblem(@PathVariable Integer id, @Length(min = 1, max = 40, message = "题目名长度要在1到40之间") String name,
+    public String updateProblem(@PathVariable Integer id, @Length(min = 1, max = 40, message = "题目名长度要在1到40之间") String name,
                                  String description, String inputFormat, String outputFormat, String explanation, String samples,
                                  @NotNull(message = "时间限制不能为空") @Range(min = 500, max = 15000, message = "时间限制必须在500ms到15000ms之间") Integer timeLimit,
                                  @NotNull(message = "内存限制不能为空") @Range(min = 128, max = 512, message = "内存限制必须在128MB到512MB之间") Integer memoryLimit,
                                  @NotNull(message = "题目状态不能为空") Visibility visibility) {
-        if (problemService.getAuthorIdById(id) != StpUtil.getLoginIdAsInt()) {
+        Problem problem = problemService.getProblemById(id);
+        if (problem == null) {
+            throw new NotFoundException("题目不存在");
+        }
+        if (problem.getAuthorId() != StpUtil.getLoginIdAsInt()) {
             throw new ForbiddenException("无权编辑该题目");
         }
         if (problemService.updateProblem(id, name, description, inputFormat, outputFormat, explanation, samples, timeLimit, memoryLimit, visibility)) {
-            return id;
+            return "题目编辑成功";
         } else {
             throw new InternalServerErrorException("题目编辑失败");
         }
@@ -80,16 +76,24 @@ public class ProblemController {
         Problem problem = problemService.getProblemById(id);
         if (problem == null) {
             throw new NotFoundException("题目不存在");
-        } else {
-            return problem;
         }
+        if(problem.getVisibility() != Visibility.PUBLIC && problem.getAuthorId() != StpUtil.getLoginIdAsInt()){
+            throw new ForbiddenException("无权查看该题目");
+        }
+        return problem;
     }
 
     @SaCheckLogin
-    @PostMapping("/{id}/exists")
-    public Boolean existsProblem(@PathVariable Integer id) {
+    @PostMapping("/{id}/check")
+    public String checkProblem(@PathVariable Integer id) {
         Problem problem = problemService.getProblemById(id);
-        return problem != null;
+        if (problem == null) {
+            throw new NotFoundException("题目不存在");
+        }
+        if(problem.getVisibility() != Visibility.PUBLIC && problem.getAuthorId() != StpUtil.getLoginIdAsInt()){
+            throw new ForbiddenException("无权查看该题目");
+        }
+        return "允许查看该题目";
     }
 
     @SaCheckLogin
@@ -120,15 +124,29 @@ public class ProblemController {
     }
 
     @SaCheckLogin
-    @GetMapping("/{id}/amount")
+    @GetMapping("/{id}/status")
     public TryPassAmountPair getTryPassAmountById(@PathVariable Integer id) {
+        Problem problem = problemService.getProblemById(id);
+        if (problem == null) {
+            throw new NotFoundException("题目不存在");
+        }
+        if(problem.getVisibility() != Visibility.PUBLIC && problem.getAuthorId() != StpUtil.getLoginIdAsInt()){
+            throw new ForbiddenException("无权查看该题目提交/通过人数");
+        }
         return problemService.getTryPassAmountPairById(id);
     }
 
     @SaCheckLogin
     @GetMapping("/{problemId}/users/{userId}")
     public ProblemUserRelation getProblemUserRelation(@PathVariable Integer userId, @PathVariable Integer problemId) {
-        return problemUserService.getProblemUserRelation(userId, problemId);
+        Problem problem = problemService.getProblemById(problemId);
+        if (problem == null) {
+            throw new NotFoundException("题目不存在");
+        }
+        if(problem.getVisibility() != Visibility.PUBLIC && problem.getAuthorId() != StpUtil.getLoginIdAsInt()){
+            throw new ForbiddenException("无权查看该题目各用户的提交/通过次数");
+        }
+        return problemService.getProblemUserRelation(userId, problemId);    // 可能不存在表项，返回null
     }
 
     @SaCheckLogin

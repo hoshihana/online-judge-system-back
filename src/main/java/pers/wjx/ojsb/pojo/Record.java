@@ -25,6 +25,8 @@ public class Record {
 
     private Integer contestId;
 
+    private Integer problemNumber;
+
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",timezone="GMT+8")
     private Date submitTime;
 
@@ -34,7 +36,7 @@ public class Record {
 
     private JudgeResult judgeResult;
 
-    private Visibility visibility;
+    private Boolean personal;
 
     private Integer executeTime; // (ms)
 

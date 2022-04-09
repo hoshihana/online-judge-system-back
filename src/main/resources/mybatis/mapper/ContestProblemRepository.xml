@@ -3,10 +3,44 @@
 <mapper namespace="pers.wjx.ojsb.repository.ContestProblemRepository">
     <insert id="addContestProblem">
         insert into contest_problem(contest_id, problem_id, problem_number)
-        values(#{contestId}, #{problemId}, #{problemNumber})
+        values (#{contestId}, #{problemId}, #{problemNumber})
     </insert>
     <delete id="deleteContestProblemsByContestId">
-        delete from contest_problem
+        delete
+        from contest_problem
         where contest_id = #{contestId}
     </delete>
+    <select id="getContestProblemEntries" resultType="pers.wjx.ojsb.pojo.ProblemEntry">
+        select problem.id             as id,
+               problem.name           as name,
+               problem.visibility     as visibility,
+               contest_problem.submit as submit,
+               contest_problem.accept as accept
+        from (select * from contest_problem where contest_id = #{contestId}) as contest_problem
+                 left join problem on contest_problem.problem_id = problem.id
+        order by contest_problem.problem_number asc
+    </select>
+    <select id="getContestProblem" resultType="pers.wjx.ojsb.pojo.Problem">
+        select problem.id              as id,
+               problem.author_id       as author_id,
+               problem.author_username as author_username,
+               problem.name            as name,
+               problem.description     as description,
+               problem.input_format    as input_format,
+               problem.output_format   as output_format,
+               problem.explanation     as explanation,
+               problem.samples         as samples,
+               problem.time_limit      as time_limit,
+               problem.memory_limit    as memory_limit,
+               problem.test_set        as test_set,
+               problem.visibility      as visibility,
+               contest_problem.submit  as submit,
+               contest_problem.accept  as accept
+        from (select *
+              from contest_problem
+              where contest_id = #{contestId}
+                and problem_number = #{problemNUmber}) as contest_problem
+                 inner join problem on contest_problem.problem_id = problem.id
+    </select>
+
 </mapper>

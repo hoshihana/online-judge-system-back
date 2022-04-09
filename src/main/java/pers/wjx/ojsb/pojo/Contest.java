@@ -1,6 +1,7 @@
 package pers.wjx.ojsb.pojo;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -24,6 +25,9 @@ public class Contest {
 
     private String description;
 
+    private Boolean passwordSet;
+
+    @JsonIgnore
     private String password;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",timezone="GMT+8")

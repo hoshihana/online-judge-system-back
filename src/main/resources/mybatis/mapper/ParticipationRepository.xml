@@ -5,4 +5,10 @@
         insert into participation(contest_id, user_id, username, nickname)
         values(#{contestId}, #{userId}, #{username}, #{nickname})
     </insert>
+    <select id="getParticipation" resultType="pers.wjx.ojsb.pojo.Participation">
+        select *
+        from participation
+        where contest_id = #{contestId} and user_id = #{userId}
+    </select>
+
 </mapper>

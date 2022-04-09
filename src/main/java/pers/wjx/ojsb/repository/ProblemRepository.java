@@ -22,13 +22,11 @@ public interface ProblemRepository {
 
     ArrayList<ProblemEntry> getProblemEntriesByAuthorId(@Param("authorId") Integer authorId, @Param("startIndex") Integer startIndex, @Param("pageSize") Integer pageSize);
 
-    ArrayList<ProblemEntry> getProblemEntriesByName(@Param("name") String name, @Param("startIndex") Integer startIndex, @Param("pageSize") Integer pageSize);
+    ArrayList<ProblemEntry> getPublicProblemEntriesByName(@Param("name") String name, @Param("startIndex") Integer startIndex, @Param("pageSize") Integer pageSize);
 
-    Integer countProblemEntriesByName(String name);
+    Integer countPublicProblemEntriesByName(String name);
 
     Integer countProblemEntriesByAuthorId(Integer authorId);
-
-    Integer countProblemEntriesById(Integer id);
 
     Integer getAuthorIdById(Integer id);
 

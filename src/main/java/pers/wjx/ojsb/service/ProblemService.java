@@ -2,22 +2,21 @@ package pers.wjx.ojsb.service;
 
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.web.multipart.MultipartFile;
-import pers.wjx.ojsb.pojo.Problem;
-import pers.wjx.ojsb.pojo.ProblemEntry;
-import pers.wjx.ojsb.pojo.TestFileInfo;
-import pers.wjx.ojsb.pojo.TryPassAmountPair;
+import pers.wjx.ojsb.pojo.*;
 import pers.wjx.ojsb.pojo.enumeration.Visibility;
 
 import java.util.ArrayList;
 
 public interface ProblemService {
-    ArrayList<ProblemEntry> getProblemEntriesByKey(String key, boolean byId, Integer pageIndex, Integer pageSize);
+    ArrayList<ProblemEntry> getPublicProblemEntriesByKey(String key, boolean byId, Integer pageIndex, Integer pageSize);
 
     Integer countProblemEntriesByKey(String key, boolean byId);
 
     ArrayList<ProblemEntry> getProblemEntriesByAuthorId(Integer authorId, Integer pageIndex, Integer pageSize);
 
     Integer countProblemEntriesByAuthorId(Integer authorId);
+
+    ProblemUserRelation getProblemUserRelation(Integer userId, Integer problemId);
 
     Problem getProblemById(Integer id);
 
@@ -29,13 +28,9 @@ public interface ProblemService {
 
     boolean deleteProblemById(Integer id);
 
-    boolean existProblem(Integer id);
-
     TryPassAmountPair getTryPassAmountPairById(Integer id);
 
     TestFileInfo saveTestFile(Integer id, MultipartFile file);
-
-    boolean checkTestSet(Integer id);
 
     boolean deleteTestFile(Integer id);
 

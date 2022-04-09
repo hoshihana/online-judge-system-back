@@ -2,8 +2,8 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="pers.wjx.ojsb.repository.RecordRepository">
     <insert id="addRecord" useGeneratedKeys="true" keyProperty="id">
-        insert into record(user_id, username, problem_id, contest_id, submit_time, code_length, submit_language)
-        values (#{userId}, #{username}, #{problemId}, #{contestId}, #{submitTime}, #{codeLength}, #{submitLanguage})
+        insert into record(user_id, username, problem_id, contest_id, problem_number, submit_time, code_length, submit_language, personal)
+        values (#{userId}, #{username}, #{problemId}, #{contestId}, #{problem_number}, #{submitTime}, #{codeLength}, #{submitLanguage}, #{personal})
     </insert>
     <update id="setJudgeResult">
         update record
@@ -30,16 +30,23 @@
         where id = #{id}
             and compile_output is null
     </update>
-    <update id="setVisibilityByProblemId">
+    <update id="setRecordsPersonalByProblemId">
         update record
-        set visibility = #{visibility}
+        set personal = #{personal}
         where problem_id = #{problemId}
+            and contest_id is null
+    </update>
+    <update id="setContestRecordsPersonalByProblemId">
+        update record
+        set personal = #{personal}
+        where problem_id = #{problemId}
+          and contest_id is not null
     </update>
     <select id="getRecords" resultType="pers.wjx.ojsb.pojo.Record">
         select *
         from record
         where username like concat('%', #{username}, '%')
-            and visibility = #{visibility}
+            and contest_id is null
         <if test="problemId != null">
             and problem_id = #{problemId}
         </if>
@@ -76,7 +83,7 @@
         select count(*)
         from record
         where username like concat('%', #{username}, '%')
-            and visibility = #{visibility}
+            and contest_id is null
         <if test="problemId != null">
             and problem_id = #{problemId}
         </if>
@@ -87,7 +94,7 @@
             and judge_result = #{judgeResult}
         </if>
     </select>
-    <select id="getRecordById" resultType="pers.wjx.ojsb.pojo.Record">
+    <select id="getRecord" resultType="pers.wjx.ojsb.pojo.Record">
         select *
         from record
         where id = #{id}
@@ -97,6 +104,7 @@
         from record
         where user_id = #{userId}
           and problem_id = #{problemId}
+          and contest_id is null
         order by id desc
             limit #{limit}
     </select>
@@ -105,5 +113,63 @@
         from record
         where judge_result = #{judgeResult}
         order by id
+    </select>
+    <select id="getContestRecords" resultType="pers.wjx.ojsb.pojo.Record">
+        select *
+        from record
+        where username like concat('%', #{username}, '%')
+            and contest_id = #{contestId}
+        <if test="problemNumber != null">
+            and problem_Number = #{problemNumber}
+        </if>
+        <if test="submitLanguage != null">
+            and submit_language = #{submitLanguage}
+        </if>
+        <if test="judgeResult != null">
+            and judge_result = #{judgeResult}
+        </if>
+        <choose>
+            <when test="asc != null">
+                <choose>
+                    <when test="orderBy == 'submitTime'">
+                        order by submit_time
+                    </when>
+                    <when test="orderBy == 'executeTime'">
+                        order by execute_time
+                    </when>
+                    <when test="orderBy == 'executeMemory'">
+                        order by execute_memory
+                    </when>
+                </choose>
+                <if test="asc == false">
+                    desc
+                </if>
+            </when>
+            <otherwise>
+                order by id desc
+            </otherwise>
+        </choose>
+        limit #{startIndex}, #{pageSize}
+    </select>
+    <select id="countContestRecords" resultType="java.lang.Integer">
+        select count(*)
+        from record
+        where username like concat('%', #{username}, '%')
+            and contest_id = #{contestId}
+        <if test="problemNumber != null">
+            and problem_number = #{problemNumber}
+        </if>
+        <if test="submitLanguage != null">
+            and submit_language = #{submitLanguage}
+        </if>
+        <if test="judgeResult != null">
+            and judge_result = #{judgeResult}
+        </if>
+    </select>
+    <select id="getContestRecord" resultType="pers.wjx.ojsb.pojo.Record">
+        select *
+        from record
+        where id = #{recordId}
+            and contest_id = #{contestId}
     </select>
 </mapper>

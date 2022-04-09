@@ -5,16 +5,19 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
-import pers.wjx.ojsb.pojo.Contest;
+import pers.wjx.ojsb.exception.BadRequestException;
+import pers.wjx.ojsb.pojo.*;
 import pers.wjx.ojsb.pojo.enumeration.ContestType;
-import pers.wjx.ojsb.repository.AccountRepository;
-import pers.wjx.ojsb.repository.ContestProblemRepository;
-import pers.wjx.ojsb.repository.ContestRepository;
+import pers.wjx.ojsb.pojo.enumeration.JudgeResult;
+import pers.wjx.ojsb.pojo.enumeration.Language;
+import pers.wjx.ojsb.pojo.enumeration.Visibility;
+import pers.wjx.ojsb.repository.*;
 import pers.wjx.ojsb.service.ContestService;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.regex.Pattern;
 
 @Service
 public class ContestServiceImpl implements ContestService {
@@ -31,15 +34,22 @@ public class ContestServiceImpl implements ContestService {
     @Resource
     private ContestProblemRepository contestProblemRepository;
 
+    @Resource
+    private RecordRepository recordRepository;
+
+    @Resource
+    private ParticipationRepository participationRepository;
+
     @Override
-    public Integer addContest(Integer authorId, String name, ContestType type, String description, String password, Date startTime, Date endTime) {
+    public Integer addContest(Integer authorId, String name, ContestType type, String description, Boolean passwordSet, String password, Date startTime, Date endTime) {
         Contest contest = new Contest();
         contest.setAuthorId(authorId);
         contest.setAuthorUsername(accountRepository.getUsernameById(authorId));
         contest.setName(name);
         contest.setType(type);
         contest.setDescription(description);
-        contest.setPassword(SaSecureUtil.md5BySalt(password, passwordSalt));
+        contest.setPasswordSet(passwordSet);
+        contest.setPassword(passwordSet ? SaSecureUtil.md5BySalt(password, passwordSalt) : null);
         contest.setStartTime(startTime);
         contest.setEndTime(endTime);
         contestRepository.addContest(contest);
@@ -47,8 +57,8 @@ public class ContestServiceImpl implements ContestService {
     }
 
     @Override
-    public boolean updateContestDetail(Integer id, String name, ContestType type, String description, String password) {
-        return contestRepository.updateContestDetail(id, name, type, description, SaSecureUtil.md5BySalt(password, passwordSalt));
+    public boolean updateContestDetail(Integer id, String name, ContestType type, String description, Boolean passwordSet, String password) {
+        return contestRepository.updateContestDetail(id, name, type, description, passwordSet, passwordSet ? SaSecureUtil.md5BySalt(password, passwordSalt) : null);
     }
 
     @Override
@@ -85,12 +95,62 @@ public class ContestServiceImpl implements ContestService {
     }
 
     @Override
-    public boolean participateContest(Integer id, Integer userId, String nickname) {
-        return false;
+    public boolean participateContest(Integer id, Integer userId, String nickname, String password) throws BadRequestException {
+        Contest contest = contestRepository.getContestById(id);
+        if (!contest.getPasswordSet() || contest.getPassword().equals(SaSecureUtil.md5BySalt(password, passwordSalt))) {
+            try {
+                participationRepository.addParticipation(id, userId, accountRepository.getUsernameById(userId), nickname);
+                return true;
+            } catch (Exception ex) {
+                throw new BadRequestException("无法重复参加比赛");
+            }
+        } else {
+            return false;
+        }
+    }
+
+    @Override
+    public boolean isContestParticipant(Integer id, Integer userId) {
+        Participation participation = participationRepository.getParticipation(id, userId);
+        return participation != null;
+    }
+
+    @Override
+    public ArrayList<ProblemEntry> getContestProblemEntries(Integer id) {
+        return contestProblemRepository.getContestProblemEntries(id);
+    }
+
+    @Override
+    public Problem getContestProblem(Integer id, Integer problemNumber) {
+        return contestProblemRepository.getContestProblem(id, problemNumber);
     }
 
     @Override
     public Contest getContestById(Integer id) {
         return contestRepository.getContestById(id);
+    }
+
+    @Override
+    public ArrayList<Record> getContestRecords(Integer id, String problemNumber, String username, Language submitLanguage, JudgeResult judgeResult, String orderBy, Boolean asc, Integer pageIndex, Integer pageSize) {
+        Integer problemNumberInt = null;
+        if (Pattern.matches("^\\d{1,8}$", problemNumber)) {
+            problemNumberInt = Integer.valueOf(problemNumber);
+        }
+        return recordRepository.getContestRecords(id, problemNumberInt, username, submitLanguage, judgeResult, orderBy, asc, (pageIndex - 1) * pageSize, pageSize);
+    }
+
+
+    @Override
+    public Integer countContestRecords(Integer id, String problemNumber, String username, Language submitLanguage, JudgeResult judgeResult) {
+        Integer problemNumberInt = null;
+        if (Pattern.matches("^\\d{1,8}$", problemNumber)) {
+            problemNumberInt = Integer.valueOf(problemNumber);
+        }
+        return recordRepository.countContestRecords(id, problemNumberInt, username, submitLanguage, judgeResult);
+    }
+
+    @Override
+    public Record getContestRecord(Integer id, Integer recordId) {
+        return recordRepository.getContestRecord(id, recordId);
     }
 }

@@ -277,7 +277,7 @@ public class JudgeServiceImpl implements JudgeService {
                         judgeRepository.updateJudge(judge);
                         if (judge.getJudgeResult() == JudgeResult.AC) {
                             recordRepository.increaseAcceptedTestAmount(judge.getRecordId());
-                            Record record = recordRepository.getRecordById(judge.getRecordId());
+                            Record record = recordRepository.getRecord(judge.getRecordId());
                             if (record.getTestAmount().equals(record.getAcceptedTestAmount())) {
                                 ArrayList<Judge> acceptedJudges = judgeRepository.getJudgesByRecordId(record.getId());
                                 int maxTime = 0, maxMemory = 0;
@@ -293,7 +293,7 @@ public class JudgeServiceImpl implements JudgeService {
                             recordRepository.setCompileOutput(judge.getRecordId(), judgeResultResponse.getCompileOutput());
                             recordRepository.setJudgeResult(judge.getRecordId(), JudgeResult.CE, null, null);
                         } else if (judge.getJudgeResult() == JudgeResult.RE){
-                                Record record = recordRepository.getRecordById(judge.getRecordId());
+                                Record record = recordRepository.getRecord(judge.getRecordId());
                                 if(judge.getExecuteMemory() >= problemRepository.getMemoryLimit(record.getProblemId()) * 1000) {
                                     judge.setJudgeResult(JudgeResult.MLE);
                                 }

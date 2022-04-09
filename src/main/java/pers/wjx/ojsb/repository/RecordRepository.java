@@ -5,7 +5,6 @@ import org.springframework.stereotype.Repository;
 import pers.wjx.ojsb.pojo.Record;
 import pers.wjx.ojsb.pojo.enumeration.JudgeResult;
 import pers.wjx.ojsb.pojo.enumeration.Language;
-import pers.wjx.ojsb.pojo.enumeration.Visibility;
 
 import java.util.ArrayList;
 
@@ -15,11 +14,17 @@ public interface RecordRepository {
 
     boolean addRecord(Record record);
 
-    ArrayList<Record> getRecords(Visibility visibility, Integer problemId, String username, Language submitLanguage, JudgeResult judgeResult, String orderBy, Boolean asc, Integer startIndex, Integer pageSize);
+    ArrayList<Record> getRecords(Integer problemId, String username, Language submitLanguage, JudgeResult judgeResult, String orderBy, Boolean asc, Integer startIndex, Integer pageSize);
 
-    Integer countRecords(Visibility visibility, Integer problemId, String username, Language submitLanguage, JudgeResult judgeResult);
+    Integer countRecords(Integer problemId, String username, Language submitLanguage, JudgeResult judgeResult);
 
-    Record getRecordById(Integer id);
+    ArrayList<Record> getContestRecords(Integer contestId, Integer problemNumber, String username, Language submitLanguage, JudgeResult judgeResult, String orderBy, Boolean asc, Integer startIndex, Integer pageSize);
+
+    Integer countContestRecords(Integer contestId, Integer problemNumber, String username, Language submitLanguage, JudgeResult judgeResult);
+
+    Record getRecord(Integer id);
+
+    Record getContestRecord(Integer contestId, Integer recordId);
 
     ArrayList<Record> getRecentRecords(Integer problemId, Integer userId, Integer limit);
 
@@ -29,7 +34,9 @@ public interface RecordRepository {
 
     boolean increaseAcceptedTestAmount(Integer id);
 
-    boolean setVisibilityByProblemId(Integer problemId, Visibility visibility);
+    boolean setRecordsPersonalByProblemId(Integer problemId, Boolean personal);
+
+    boolean setContestRecordsPersonalByProblemId(Integer problemId, Boolean personal);
 
     boolean setJudgeResult(Integer id, JudgeResult judgeResult, Integer executeTime, Integer executeMemory);
 
