@@ -16,6 +16,7 @@ import javax.annotation.Resource;
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
@@ -40,45 +41,76 @@ public class ProblemServiceImpl implements ProblemService {
     public String testLocation;
 
     @Override
-    public ArrayList<ProblemEntry> getPublicProblemEntriesByKey(String key, boolean byId, Integer pageIndex, Integer pageSize) {
+    public ArrayList<ProblemEntry> getPublicProblemEntriesByKey(String key, Integer pageIndex, Integer pageSize) {
         key = key.trim();
         ArrayList<ProblemEntry> problemEntries = new ArrayList<>();
-        if (byId) {
-            if (Pattern.matches("^\\d{1,8}$", key)) {
-                Problem problem = problemRepository.getProblemById(Integer.valueOf(key));
-                if (problem != null && problem.getVisibility() == Visibility.PUBLIC) {
-                    problemEntries.add(new ProblemEntry(problem.getId(), problem.getName(), problem.getVisibility(), problem.getSubmit(), problem.getAccept()));
-                }
+        if (Pattern.matches("^\\d{1,8}$", key)) {
+            Problem problem = problemRepository.getProblemById(Integer.valueOf(key));
+            if (problem != null && !problem.getName().contains(key) && problem.getVisibility() == Visibility.PUBLIC) {
+                problemEntries.add(new ProblemEntry(problem.getId(), problem.getName(), problem.getVisibility(), problem.getTestSet(), problem.getSubmit(), problem.getAccept()));
             }
-        } else {
-            problemEntries = problemRepository.getPublicProblemEntriesByName(key, (pageIndex - 1) * pageSize, pageSize);
         }
+        problemEntries.addAll(problemRepository.getPublicProblemEntriesByName(key, (pageIndex - 1) * pageSize, pageSize));
         return problemEntries;
     }
 
     @Override
-    public Integer countProblemEntriesByKey(String key, boolean byId) {
+    public Integer countProblemEntriesByKey(String key) {
         key = key.trim();
-        if (byId) {
-            if (Pattern.matches("^\\d{1,8}$", key)) {
-                Problem problem = problemRepository.getProblemById(Integer.valueOf(key));
-                return problem != null && problem.getVisibility() == Visibility.PUBLIC ? 1 : 0;
-            } else {
-                return 0;
+        int total = 0;
+        if (Pattern.matches("^\\d{1,8}$", key)) {
+            Problem problem = problemRepository.getProblemById(Integer.valueOf(key));
+            if (problem != null && !problem.getName().contains(key) && problem.getVisibility() == Visibility.PUBLIC) {
+                total += 1;
             }
-        } else {
-            return problemRepository.countPublicProblemEntriesByName(key);
         }
+        total += problemRepository.countPublicProblemEntriesByName(key);
+        return total;
     }
 
     @Override
-    public ArrayList<ProblemEntry> getProblemEntriesByAuthorId(Integer authorId, Integer pageIndex, Integer pageSize) {
-        return problemRepository.getProblemEntriesByAuthorId(authorId, (pageIndex - 1) * pageSize, pageSize);
+    public ArrayList<ProblemEntry> getUserProblemEntriesByKey(Integer authorId, String key, Boolean showPrivate, Boolean showHidden, Boolean showPublic, Integer pageIndex, Integer pageSize) {
+        key = key.trim();
+        ArrayList<ProblemEntry> problemEntries = new ArrayList<>();
+        ArrayList<Visibility> visibilities = getVisibilities(showPrivate, showHidden, showPublic);
+        if (Pattern.matches("^\\d{1,8}$", key)) {
+            Problem problem = problemRepository.getProblemById(Integer.valueOf(key));
+            if (problem != null && problem.getAuthorId().equals(authorId) && visibilities.contains(problem.getVisibility()) && !problem.getName().contains(key)) {
+                problemEntries.add(new ProblemEntry(problem.getId(), problem.getName(), problem.getVisibility(), problem.getTestSet(), problem.getSubmit(), problem.getAccept()));
+            }
+        }
+        problemEntries.addAll(problemRepository.getUserProblemEntriesByName(authorId, key, visibilities, (pageIndex - 1) * pageSize, pageSize));
+        return problemEntries;
     }
 
     @Override
-    public Integer countProblemEntriesByAuthorId(Integer authorId) {
-        return problemRepository.countProblemEntriesByAuthorId(authorId);
+    public Integer countUserProblemEntriesByKey(Integer authorId, String key, Boolean showPrivate, Boolean showHidden, Boolean showPublic) {
+        key = key.trim();
+        int total = 0;
+        ArrayList<Visibility> visibilities = getVisibilities(showPrivate, showHidden, showPublic);
+        if (Pattern.matches("^\\d{1,8}$", key)) {
+            Problem problem = problemRepository.getProblemById(Integer.valueOf(key));
+            if (problem != null && problem.getAuthorId().equals(authorId) && visibilities.contains(problem.getVisibility()) && !problem.getName().contains(key)) {
+                total += 1;
+            }
+        }
+        total += problemRepository.countUserProblemEntriesByName(authorId, key, visibilities);
+        return total;
+    }
+
+    @Override
+    public ArrayList<ProblemEntry> getAllUserProblemEntriesByKey(Integer authorId, String key, Boolean showPrivate, Boolean showHidden, Boolean showPublic) {
+        key = key.trim();
+        ArrayList<ProblemEntry> problemEntries = new ArrayList<>();
+        ArrayList<Visibility> visibilities = getVisibilities(showPrivate, showHidden, showPublic);
+        if (Pattern.matches("^\\d{1,8}$", key)) {
+            Problem problem = problemRepository.getProblemById(Integer.valueOf(key));
+            if (problem != null && problem.getAuthorId().equals(authorId) && visibilities.contains(problem.getVisibility()) && !problem.getName().contains(key)) {
+                problemEntries.add(new ProblemEntry(problem.getId(), problem.getName(), problem.getVisibility(), problem.getTestSet(), problem.getSubmit(), problem.getAccept()));
+            }
+        }
+        problemEntries.addAll(problemRepository.getAllUserProblemEntriesByName(authorId, key, visibilities));
+        return problemEntries;
     }
 
     @Override
@@ -125,10 +157,10 @@ public class ProblemServiceImpl implements ProblemService {
         problem.setTimeLimit(timeLimit);
         problem.setMemoryLimit(memoryLimit);
         problem.setVisibility(visibility);
-        if(visibility == Visibility.PUBLIC) {
+        if (visibility == Visibility.PUBLIC) {
             recordRepository.setRecordsPersonalByProblemId(id, false);
             recordRepository.setContestRecordsPersonalByProblemId(id, false);
-        } else if(visibility == Visibility.HIDDEN) {
+        } else if (visibility == Visibility.HIDDEN) {
             recordRepository.setRecordsPersonalByProblemId(id, true);
             recordRepository.setContestRecordsPersonalByProblemId(id, false);
         } else {
@@ -146,7 +178,7 @@ public class ProblemServiceImpl implements ProblemService {
     @Override
     public boolean deleteProblemById(Integer id) {
         File testFile = new File(testLocation + id + ".zip");
-        if(testFile.isFile() && testFile.exists()) {
+        if (testFile.isFile() && testFile.exists()) {
             testFile.delete();
         }
         return problemRepository.deleteProblemById(id);
@@ -222,9 +254,26 @@ public class ProblemServiceImpl implements ProblemService {
     @Override
     public FileSystemResource getTestFileResource(Integer id) {
         File file = new File(testLocation + id + ".zip");
-        if(!file.exists()) {
+        if (!file.exists()) {
             return null;
         }
         return new FileSystemResource(file);
+    }
+
+    private ArrayList<Visibility> getVisibilities(Boolean showPrivate, Boolean showHidden, Boolean showPublic) {
+        if(!showPrivate && !showHidden && !showPublic) {
+            return new ArrayList<>(Arrays.asList(Visibility.PRIVATE, Visibility.HIDDEN, Visibility.PUBLIC));
+        }
+        ArrayList<Visibility> visibilities = new ArrayList<>();
+        if(showPrivate) {
+            visibilities.add(Visibility.PRIVATE);
+        }
+        if(showHidden) {
+            visibilities.add(Visibility.HIDDEN);
+        }
+        if(showPublic) {
+            visibilities.add(Visibility.PUBLIC);
+        }
+        return visibilities;
     }
 }

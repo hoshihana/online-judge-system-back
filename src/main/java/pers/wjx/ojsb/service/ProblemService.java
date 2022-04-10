@@ -8,13 +8,15 @@ import pers.wjx.ojsb.pojo.enumeration.Visibility;
 import java.util.ArrayList;
 
 public interface ProblemService {
-    ArrayList<ProblemEntry> getPublicProblemEntriesByKey(String key, boolean byId, Integer pageIndex, Integer pageSize);
+    ArrayList<ProblemEntry> getPublicProblemEntriesByKey(String key, Integer pageIndex, Integer pageSize);
 
-    Integer countProblemEntriesByKey(String key, boolean byId);
+    Integer countProblemEntriesByKey(String key);
 
-    ArrayList<ProblemEntry> getProblemEntriesByAuthorId(Integer authorId, Integer pageIndex, Integer pageSize);
+    ArrayList<ProblemEntry> getUserProblemEntriesByKey(Integer authorId, String key, Boolean showPrivate, Boolean showHidden, Boolean showPublic, Integer pageIndex, Integer pageSize);
 
-    Integer countProblemEntriesByAuthorId(Integer authorId);
+    Integer countUserProblemEntriesByKey(Integer authorId, String key, Boolean showPrivate, Boolean showHidden, Boolean showPublic);
+
+    ArrayList<ProblemEntry> getAllUserProblemEntriesByKey(Integer authorId, String key, Boolean showPrivate, Boolean showHidden, Boolean showPublic);
 
     ProblemUserRelation getProblemUserRelation(Integer userId, Integer problemId);
 

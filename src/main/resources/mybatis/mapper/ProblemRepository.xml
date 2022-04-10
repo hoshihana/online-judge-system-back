@@ -2,9 +2,11 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="pers.wjx.ojsb.repository.ProblemRepository">
     <insert id="addProblem" useGeneratedKeys="true" keyProperty="id">
-        insert into problem(author_id, author_username, `name`, description, input_format, output_format, explanation, samples,
+        insert into problem(author_id, author_username, `name`, description, input_format, output_format, explanation,
+                            samples,
                             time_limit, memory_limit, visibility)
-        values (#{authorId},#{authorUsername}, #{name}, #{description}, #{inputFormat}, #{outputFormat}, #{explanation},
+        values (#{authorId}, #{authorUsername}, #{name}, #{description}, #{inputFormat}, #{outputFormat},
+                #{explanation},
                 #{samples}, #{timeLimit}, #{memoryLimit}, #{visibility})
     </insert>
     <update id="updateProblem">
@@ -45,33 +47,46 @@
         from problem
         where id = #{id}
     </select>
-    <select id="getProblemEntriesByAuthorId" resultType="pers.wjx.ojsb.pojo.ProblemEntry">
-        select id, name, visibility, submit, accept
-        from problem
-        where author_id = #{authorId}
-        order by id desc
-            limit #{startIndex}, #{pageSize}
-    </select>
     <select id="getPublicProblemEntriesByName" resultType="pers.wjx.ojsb.pojo.ProblemEntry">
-        select id, name, visibility, submit, accept
+        select id, name, visibility, test_set, submit, accept
         from problem
-        where visibility = 'PUBLIC' and `name` like concat('%', #{name}, '%')
-            limit #{startIndex}, #{pageSize}
+        where visibility = 'PUBLIC'
+          and `name` like concat('%', #{name}, '%')
+            limit #{startIndex}
+            , #{pageSize}
     </select>
     <select id="countPublicProblemEntriesByName" resultType="java.lang.Integer">
         select count(*)
         from problem
-        where visibility = 'PUBLIC' and `name` like concat('%', #{name}, '%')
+        where visibility = 'PUBLIC'
+          and `name` like concat('%', #{name}, '%')
     </select>
     <select id="getAuthorIdById" resultType="java.lang.Integer">
         select author_id
         from problem
         where id = #{id}
     </select>
-    <select id="countProblemEntriesByAuthorId" resultType="java.lang.Integer">
+    <select id="getUserProblemEntriesByName" resultType="pers.wjx.ojsb.pojo.ProblemEntry">
+        select id, name, visibility, test_set, submit, accept
+        from problem
+        where author_id = #{authorId}
+        and `name` like concat('%', #{name}, '%')
+        and visibility in
+        <foreach collection="visibilities" item="visibility" index="index" open="(" close=")" separator=",">
+            #{visibility}
+        </foreach>
+        order by id desc
+        limit #{startIndex}, #{pageSize}
+    </select>
+    <select id="countUserProblemEntriesByName" resultType="java.lang.Integer">
         select count(*)
         from problem
         where author_id = #{authorId}
+        and `name` like concat('%', #{name}, '%')
+        and visibility in
+        <foreach collection="visibilities" item="visibility" index="index" open="(" close=")" separator=",">
+            #{visibility}
+        </foreach>
     </select>
     <select id="getTestSet" resultType="java.lang.Boolean">
         select test_set
@@ -82,6 +97,17 @@
         select memory_limit
         from problem
         where id = #{id}
+    </select>
+    <select id="getAllUserProblemEntriesByName" resultType="pers.wjx.ojsb.pojo.ProblemEntry">
+        select id, name, visibility, test_set, submit, accept
+        from problem
+        where author_id = #{authorId}
+        and `name` like concat('%', #{name}, '%')
+        and visibility in
+        <foreach collection="visibilities" item="visibility" index="index" open="(" close=")" separator=",">
+            #{visibility}
+        </foreach>
+        order by id desc
     </select>
 
 </mapper>

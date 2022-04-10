@@ -15,6 +15,8 @@ public class ProblemEntry {
 
     private Visibility visibility;
 
+    private Boolean testSet;
+
     private Integer submit;
 
     private Integer accept;

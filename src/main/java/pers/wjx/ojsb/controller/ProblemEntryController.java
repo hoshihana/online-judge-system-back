@@ -28,36 +28,55 @@ public class ProblemEntryController {
     @SaCheckLogin
     @GetMapping("/public")
     public ArrayList<ProblemEntry> getPublicProblemEntriesByKey(@Length(max = 40, message = "搜索关键字长度要在0到40之间") String key,
-                                                         @NotNull(message = "查询方式不能为空") boolean byId,
-                                                         @Min(value = 1, message = "页码不能小于1") Integer pageIndex,
-                                                         @Min(value = 1, message = "页面大小不能小于1") Integer pageSize) {
-        return problemService.getPublicProblemEntriesByKey(key == null ? "" : key, byId, pageIndex, pageSize);
+                                                                @Min(value = 1, message = "页码不能小于1") Integer pageIndex,
+                                                                @Min(value = 1, message = "页面大小不能小于1") Integer pageSize) {
+        return problemService.getPublicProblemEntriesByKey(key == null ? "" : key, pageIndex, pageSize);
     }
 
     @SaCheckLogin
     @GetMapping("/public/amount")
-    public Integer countPublicProblemEntriesByKey(@Length(max = 40, message = "搜索关键字长度要在0到40之间") String key,
-                                     @NotNull(message = "查询方式不能为空") boolean byId) {
-        return problemService.countProblemEntriesByKey(key == null ? "" : key, byId);
+    public Integer countPublicProblemEntriesByKey(@Length(max = 40, message = "搜索关键字长度要在0到40之间") String key) {
+        return problemService.countProblemEntriesByKey(key == null ? "" : key);
+    }
+
+    @SaCheckLogin
+    @GetMapping("/user/{authorId}/all")
+    public ArrayList<ProblemEntry> getAllUserProblemEntriesByKey(@PathVariable Integer authorId,
+                                                              @Length(max = 40, message = "搜索关键字长度要在0到40之间") String key,
+                                                              @NotNull(message = "状态筛选不能为空") Boolean showPrivate,
+                                                              @NotNull(message = "状态筛选不能为空") Boolean showHidden,
+                                                              @NotNull(message = "状态筛选不能为空") Boolean showPublic) {
+        if (authorId != StpUtil.getLoginIdAsInt()) {
+            throw new ForbiddenException("用户无权访问");
+        }
+        return problemService.getAllUserProblemEntriesByKey(authorId, key == null ? "" : key, showPrivate, showHidden, showPublic);
     }
 
     @SaCheckLogin
     @GetMapping("/user/{authorId}")
-    public ArrayList<ProblemEntry> getProblemEntriesByAuthorId(@PathVariable Integer authorId,
-                                                               @Min(value = 1, message = "页码不能小于1") Integer pageIndex,
-                                                               @Min(value = 1, message = "页面大小不能小于1") Integer pageSize) {
-        if(authorId != StpUtil.getLoginIdAsInt()) {
+    public ArrayList<ProblemEntry> getUserProblemEntriesByKey(@PathVariable Integer authorId,
+                                                              @Length(max = 40, message = "搜索关键字长度要在0到40之间") String key,
+                                                              @NotNull(message = "状态筛选不能为空") Boolean showPrivate,
+                                                              @NotNull(message = "状态筛选不能为空") Boolean showHidden,
+                                                              @NotNull(message = "状态筛选不能为空") Boolean showPublic,
+                                                              @Min(value = 1, message = "页码不能小于1") Integer pageIndex,
+                                                              @Min(value = 1, message = "页面大小不能小于1") Integer pageSize) {
+        if (authorId != StpUtil.getLoginIdAsInt()) {
             throw new ForbiddenException("用户无权访问");
         }
-        return problemService.getProblemEntriesByAuthorId(authorId, pageIndex, pageSize);
+        return problemService.getUserProblemEntriesByKey(authorId, key == null ? "" : key, showPrivate, showHidden, showPublic, pageIndex, pageSize);
     }
 
     @SaCheckLogin
     @GetMapping("/user/{authorId}/amount")
-    public Integer countProblemEntriesByAuthorId(@PathVariable Integer authorId) {
-        if(authorId != StpUtil.getLoginIdAsInt()) {
+    public Integer countUserProblemEntriesByKey(@PathVariable Integer authorId,
+                                                @Length(max = 40, message = "搜索关键字长度要在0到40之间") String key,
+                                                @NotNull(message = "状态筛选不能为空") Boolean showPrivate,
+                                                @NotNull(message = "状态筛选不能为空") Boolean showHidden,
+                                                @NotNull(message = "状态筛选不能为空") Boolean showPublic) {
+        if (authorId != StpUtil.getLoginIdAsInt()) {
             throw new ForbiddenException("用户无权访问");
         }
-        return problemService.countProblemEntriesByAuthorId(authorId);
+        return problemService.countUserProblemEntriesByKey(authorId, key == null ? "" : key, showPrivate, showHidden, showPublic);
     }
 }

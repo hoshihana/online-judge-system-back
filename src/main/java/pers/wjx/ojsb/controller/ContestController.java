@@ -338,7 +338,7 @@ public class ContestController {
     @SaCheckLogin
     @GetMapping("/{id}/records/{recordId}")
     public Record getContestRecord(@PathVariable Integer id, @PathVariable Integer recordId) {
-        Contest contest = getContest(id);
+        Contest contest = contestService.getContestById(id);
         if(contest == null) {
             throw new NotFoundException("该比赛不存在");
         }
@@ -354,5 +354,47 @@ public class ContestController {
             throw new ForbiddenException("该比赛尚未结束，仅提交者和管理员可以查看该记录");
         }
         return record;
+    }
+
+    @SaCheckLogin
+    @GetMapping("/{id}/records/{recordId}/code")
+    public String getContestCode(@PathVariable Integer id, @PathVariable Integer recordId, Language submitLanguage, Integer codeLength) {
+        Contest contest = contestService.getContestById(id);
+        if(contest == null) {
+            throw new NotFoundException("该比赛不存在");
+        }
+        Record record = contestService.getContestRecord(id, recordId);
+        if(record == null) {
+            throw new NotFoundException("该记录不存在");
+        }
+        if(record.getPersonal() && StpUtil.getLoginIdAsInt() != record.getUserId()) {   // todo 管理员可查看该提交代码
+            throw new ForbiddenException("该题目为私密，仅提交者和管理员可以查看该提交代码");
+        }
+        Date current = new Date();
+        if(!current.after(contest.getEndTime()) && StpUtil.getLoginIdAsInt() != record.getUserId()) {
+            throw new ForbiddenException("该比赛尚未结束，仅提交者和管理员可以查看该提交代码");
+        }
+        return recordService.getCode(recordId, submitLanguage, codeLength);
+    }
+
+    @SaCheckLogin
+    @GetMapping("/{id}/records/{recordId}/compileOutput")
+    public String getContestCompileOutput(@PathVariable Integer id, @PathVariable Integer recordId) {
+        Contest contest = contestService.getContestById(id);
+        if(contest == null) {
+            throw new NotFoundException("该比赛不存在");
+        }
+        Record record = contestService.getContestRecord(id, recordId);
+        if(record == null) {
+            throw new NotFoundException("该记录不存在");
+        }
+        if(record.getPersonal() && StpUtil.getLoginIdAsInt() != record.getUserId()) {   // todo 管理员可查看该编译信息
+            throw new ForbiddenException("该题目为私密，仅提交者和管理员可以查看该编译信息");
+        }
+        Date current = new Date();
+        if(!current.after(contest.getEndTime()) && StpUtil.getLoginIdAsInt() != record.getUserId()) {
+            throw new ForbiddenException("该比赛尚未结束，仅提交者和管理员可以查看该编译信息");
+        }
+        return record.getCompileOutput();
     }
 }

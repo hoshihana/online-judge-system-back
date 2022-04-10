@@ -1,10 +1,10 @@
 package pers.wjx.ojsb.repository;
 
 import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 import pers.wjx.ojsb.pojo.Problem;
 import pers.wjx.ojsb.pojo.ProblemEntry;
+import pers.wjx.ojsb.pojo.enumeration.Visibility;
 
 import java.util.ArrayList;
 
@@ -20,13 +20,15 @@ public interface ProblemRepository {
 
     boolean deleteProblemById(Integer id);
 
-    ArrayList<ProblemEntry> getProblemEntriesByAuthorId(@Param("authorId") Integer authorId, @Param("startIndex") Integer startIndex, @Param("pageSize") Integer pageSize);
-
-    ArrayList<ProblemEntry> getPublicProblemEntriesByName(@Param("name") String name, @Param("startIndex") Integer startIndex, @Param("pageSize") Integer pageSize);
+    ArrayList<ProblemEntry> getPublicProblemEntriesByName(String name, Integer startIndex, Integer pageSize);
 
     Integer countPublicProblemEntriesByName(String name);
 
-    Integer countProblemEntriesByAuthorId(Integer authorId);
+    ArrayList<ProblemEntry> getUserProblemEntriesByName(Integer authorId, String name, ArrayList<Visibility> visibilities, Integer startIndex, Integer pageSize);
+
+    ArrayList<ProblemEntry> getAllUserProblemEntriesByName(Integer authorId, String name, ArrayList<Visibility> visibilities);
+
+    Integer countUserProblemEntriesByName(Integer authorId, String name, ArrayList<Visibility> visibilities);
 
     Integer getAuthorIdById(Integer id);
 
