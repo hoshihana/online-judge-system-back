@@ -28,6 +28,8 @@ public interface ContestService {
 
     boolean setContestProblems(Integer id, ArrayList<Integer> problemIds);
 
+    boolean validateProblemIds(Integer authorId, ArrayList<Integer> problemIds);
+
     ArrayList<ProblemEntry> getContestProblemEntries(Integer id);
 
     Problem getContestProblem(Integer id, Integer problemNumber);

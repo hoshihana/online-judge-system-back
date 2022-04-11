@@ -17,6 +17,8 @@ import pers.wjx.ojsb.service.ContestService;
 import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 @Service
@@ -30,6 +32,9 @@ public class ContestServiceImpl implements ContestService {
 
     @Resource
     private AccountRepository accountRepository;
+
+    @Resource
+    private ProblemRepository problemRepository;
 
     @Resource
     private ContestProblemRepository contestProblemRepository;
@@ -92,6 +97,24 @@ public class ContestServiceImpl implements ContestService {
             ex.printStackTrace();
             return false;
         }
+    }
+
+    @Override
+    public boolean validateProblemIds(Integer authorId, ArrayList<Integer> problemIds) {
+        Set<Integer> set = new HashSet<>();
+        for (Integer problemId : problemIds) {
+            if (set.contains(problemId)) {
+                return false;
+            } else {
+                Problem problem = problemRepository.getProblemById(problemId);
+                if (problem == null || problem.getAuthorId() != authorId) {
+                    return false;
+                } else {
+                    set.add(problemId);
+                }
+            }
+        }
+        return true;
     }
 
     @Override

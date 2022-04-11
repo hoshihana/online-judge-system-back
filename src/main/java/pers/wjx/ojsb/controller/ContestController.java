@@ -48,8 +48,8 @@ public class ContestController {
                               @NotNull(message = "比赛类型不能为空") ContestType type, String description,
                               @NotNull(message = "需明确是否设置密码") Boolean passwordSet, String password,
                               @NotNull(message = "开始时间不能为空") Date startTime,
-                              @NotNull(message = "结束时间不能为空") Date endTime) {
-        if (password != null) {
+                              @NotNull(message = "结束时间不能为空") Date endTime, Integer[] problemIds) {
+        if (passwordSet) {
             if (password.length() < 6 || password.length() > 16) {
                 throw new BadRequestException("密码长度需在6到16位之间");
             }
@@ -58,17 +58,23 @@ public class ContestController {
             }
         }
         Date current = new Date();
-        if (startTime.getTime() - current.getTime() < (4 * 60 + 30) * 1000) {
+        if (startTime.getTime() - current.getTime() < 4 * 60 * 1000) {
             throw new BadRequestException("开始时间必须至少在当前时间的5分钟之后");
         }
         if (!endTime.after(startTime)) {
             throw new BadRequestException("结束时间必须在开始时间之后");
         }
+        if(!contestService.validateProblemIds(StpUtil.getLoginIdAsInt(), new ArrayList<>(Arrays.asList(problemIds)))) {
+            throw new BadRequestException("题目列表有重复题目或者非本人创建的题目");
+        }
         Integer id = contestService.addContest(StpUtil.getLoginIdAsInt(), name, type, description, passwordSet, password, startTime, endTime);
         if (id == null) {
             throw new InternalServerErrorException("比赛创建失败");
-        } else {
+        }
+        if(contestService.setContestProblems(id, new ArrayList<>(Arrays.asList(problemIds)))) {
             return id;
+        } else {
+            throw new InternalServerErrorException("比赛创建失败");
         }
     }
 
@@ -126,7 +132,7 @@ public class ContestController {
         if (!current.before(contest.getStartTime())) {
             throw new BadRequestException("比赛已开始或已结束，无法修改比赛时间");
         }
-        if (startTime.getTime() - current.getTime() < (4 * 60 + 30) * 1000) {
+        if (startTime.getTime() - current.getTime() < 4 * 60 * 1000) {
             throw new BadRequestException("开始时间必须至少在当前时间的5分钟之后");
         }
         if (!endTime.after(startTime)) {
