@@ -14,7 +14,7 @@
         select problem.id             as id,
                problem.name           as name,
                problem.visibility     as visibility,
-               problem.test_set        as test_set
+               problem.test_set       as test_set,
                contest_problem.submit as submit,
                contest_problem.accept as accept
         from (select * from contest_problem where contest_id = #{contestId}) as contest_problem

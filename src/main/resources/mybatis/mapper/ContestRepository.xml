@@ -2,12 +2,18 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="pers.wjx.ojsb.repository.ContestRepository">
     <insert id="addContest" useGeneratedKeys="true" keyProperty="id">
-        insert into contest(author_id, author_username, name, type , description, password_set, password, start_time, end_time)
-        values (#{authorId}, #{authorUsername}, #{name}, #{type}, #{description}, #{passwordSet}, #{password}, #{startTime}, #{endTime})
+        insert into contest(author_id, author_username, name, type, description, password_set, password, start_time,
+                            end_time, problem_amount)
+        values (#{authorId}, #{authorUsername}, #{name}, #{type}, #{description}, #{passwordSet}, #{password},
+                #{startTime}, #{endTime}, #{problemAmount})
     </insert>
     <update id="updateContestDetail">
         update contest
-        set name = #{name}, type = #{type}, description = #{description}, password_set = #{passwordSet}, password = #{password}
+        set name         = #{name},
+            type         = #{type},
+            description  = #{description},
+            password_set = #{passwordSet},
+            password     = #{password}
         where id = #{id}
     </update>
     <update id="setContestEndTime">
@@ -17,12 +23,49 @@
     </update>
     <update id="setContestTime">
         update contest
-        set start_time = #{startTime}, end_time = #{endTime}
+        set start_time = #{startTime},
+            end_time   = #{endTime}
         where id = #{id}
     </update>
     <select id="getContestById" resultType="pers.wjx.ojsb.pojo.Contest">
         select *
         from contest
         where id = #{id}
+    </select>
+    <select id="getUserContestsByName" resultType="pers.wjx.ojsb.pojo.Contest">
+        select *
+        from contest
+        where author_id = #{authorId}
+        and `name` like concat('%', #{name}, '%')
+        and type in
+        <foreach collection="types" item="type" index="index" open="(" close=")" separator=",">
+            #{type}
+        </foreach>
+        <choose>
+            <when test="orderByStartTimeAsc != null">
+                <choose>
+                    <when test="orderByStartTimeAsc">
+                        order by start_time asc
+                    </when>
+                    <otherwise>
+                        order by start_time desc
+                    </otherwise>
+                </choose>
+            </when>
+            <otherwise>
+                order by id desc
+            </otherwise>
+        </choose>
+        limit #{startIndex}, #{pageSize}
+    </select>
+    <select id="countUserContestsByName" resultType="java.lang.Integer">
+        select count(*)
+        from contest
+        where author_id = #{authorId}
+        and `name` like concat('%', #{name}, '%')
+        and type in
+        <foreach collection="types" item="type" index="index" open="(" close=")" separator=",">
+            #{type}
+        </foreach>
     </select>
 </mapper>

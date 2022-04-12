@@ -64,14 +64,14 @@ public class ContestController {
         if (!endTime.after(startTime)) {
             throw new BadRequestException("结束时间必须在开始时间之后");
         }
-        if(!contestService.validateProblemIds(StpUtil.getLoginIdAsInt(), new ArrayList<>(Arrays.asList(problemIds)))) {
+        if (!contestService.validateProblemIds(StpUtil.getLoginIdAsInt(), new ArrayList<>(Arrays.asList(problemIds)))) {
             throw new BadRequestException("题目列表有重复题目或者非本人创建的题目");
         }
-        Integer id = contestService.addContest(StpUtil.getLoginIdAsInt(), name, type, description, passwordSet, password, startTime, endTime);
+        Integer id = contestService.addContest(StpUtil.getLoginIdAsInt(), name, type, description, passwordSet, password, startTime, endTime, problemIds.length);
         if (id == null) {
             throw new InternalServerErrorException("比赛创建失败");
         }
-        if(contestService.setContestProblems(id, new ArrayList<>(Arrays.asList(problemIds)))) {
+        if (contestService.setContestProblems(id, new ArrayList<>(Arrays.asList(problemIds)))) {
             return id;
         } else {
             throw new InternalServerErrorException("比赛创建失败");
@@ -89,6 +89,50 @@ public class ContestController {
     }
 
     @SaCheckLogin
+    @GetMapping("/{id}/password")
+    public String getContestPassword(@PathVariable Integer id) {
+        Contest contest = contestService.getContestById(id);
+        if (contest == null) {
+            throw new NotFoundException("该比赛不存在");
+        }
+        if(!contest.getPasswordSet()) {
+            throw new BadRequestException("该比赛未设置密码");
+        }
+        if(contest.getAuthorId() != StpUtil.getLoginIdAsInt()) {
+            throw new ForbiddenException("无权查看该比赛密码");
+        }
+        return contest.getPassword();
+    }
+
+    @SaCheckLogin
+    @GetMapping("/users/{authorId}")
+    public ArrayList<Contest> getUserContestsByKey(@PathVariable Integer authorId,
+                                                   @Length(max = 40, message = "搜索关键字长度要在0到40之间") String key,
+                                                   @NotNull(message = "类型筛选不能为空") Boolean showPractice,
+                                                   @NotNull(message = "类型筛选不能为空") Boolean showCompetition,
+                                                   Boolean orderByStartTimeAsc,
+                                                   @Min(value = 1, message = "页码不能小于1") Integer pageIndex,
+                                                   @Min(value = 1, message = "页面大小不能小于1") Integer pageSize) {
+        if (authorId != StpUtil.getLoginIdAsInt()) {
+            throw new ForbiddenException("用户无权访问");
+        }
+        return contestService.getUserContestsByKey(authorId, key, showPractice, showCompetition, orderByStartTimeAsc, pageIndex, pageSize);
+    }
+
+    @SaCheckLogin
+    @GetMapping("/users/{authorId}/amount")
+    public Integer countUserContestsByKey(@PathVariable Integer authorId,
+                                                   @Length(max = 40, message = "搜索关键字长度要在0到40之间") String key,
+                                                   @NotNull(message = "类型筛选不能为空") Boolean showPractice,
+                                                   @NotNull(message = "类型筛选不能为空") Boolean showCompetition) {
+        if (authorId != StpUtil.getLoginIdAsInt()) {
+            throw new ForbiddenException("用户无权访问");
+        }
+        return contestService.countUserContestsByKey(authorId, key, showPractice, showCompetition);
+    }
+
+
+    @SaCheckLogin
     @PatchMapping("/{id}/detail")   // 比赛创建后任何阶段均能修改比赛详情
     public String updateContestDetail(@PathVariable Integer id,
                                       @Length(min = 1, max = 40, message = "比赛名称长度要在1到40之间") String name,
@@ -98,7 +142,7 @@ public class ContestController {
         if (contest == null) {
             throw new NotFoundException("该比赛不存在");
         }
-        if(contest.getAuthorId() != StpUtil.getLoginIdAsInt()) {
+        if (contest.getAuthorId() != StpUtil.getLoginIdAsInt()) {
             throw new ForbiddenException("无权编辑该比赛");
         }
         if (password != null) {
@@ -125,7 +169,7 @@ public class ContestController {
         if (contest == null) {
             throw new NotFoundException("该比赛不存在");
         }
-        if(contest.getAuthorId() != StpUtil.getLoginIdAsInt()) {
+        if (contest.getAuthorId() != StpUtil.getLoginIdAsInt()) {
             throw new ForbiddenException("无权修改比赛时间");
         }
         Date current = new Date();
@@ -154,7 +198,7 @@ public class ContestController {
         if (contest == null) {
             throw new NotFoundException("该比赛不存在");
         }
-        if(contest.getAuthorId() != StpUtil.getLoginIdAsInt()) {
+        if (contest.getAuthorId() != StpUtil.getLoginIdAsInt()) {
             throw new ForbiddenException("无权重置比赛");
         }
         Date current = new Date();
@@ -181,7 +225,7 @@ public class ContestController {
         if (contest == null) {
             throw new NotFoundException("该比赛不存在");
         }
-        if(contest.getAuthorId() != StpUtil.getLoginIdAsInt()) {
+        if (contest.getAuthorId() != StpUtil.getLoginIdAsInt()) {
             throw new ForbiddenException("无权修改比赛结束时间");
         }
         Date current = new Date();
@@ -205,7 +249,7 @@ public class ContestController {
         if (contest == null) {
             throw new NotFoundException("该比赛不存在");
         }
-        if(contest.getAuthorId() != StpUtil.getLoginIdAsInt()) {
+        if (contest.getAuthorId() != StpUtil.getLoginIdAsInt()) {
             throw new ForbiddenException("无权设置比赛题目列表");
         }
         Date current = new Date();
@@ -226,10 +270,10 @@ public class ContestController {
         if (contest == null) {
             throw new NotFoundException("该比赛不存在");
         }
-        if(contest.getAuthorId() == StpUtil.getLoginIdAsInt()) {
+        if (contest.getAuthorId() == StpUtil.getLoginIdAsInt()) {    // todo 管理员和作者均无法参赛
             throw new ForbiddenException("比赛作者无法参加比赛");
         }
-        if(contestService.participateContest(id, StpUtil.getLoginIdAsInt(), nickname, password)) {
+        if (contestService.participateContest(id, StpUtil.getLoginIdAsInt(), nickname, password)) {
             return "比赛参加成功";
         } else {
             throw new UnauthorizedException("比赛密码错误");
@@ -243,12 +287,12 @@ public class ContestController {
         if (contest == null) {
             throw new NotFoundException("该比赛不存在");
         }
-        if(contest.getAuthorId() != StpUtil.getLoginIdAsInt()) {
-            if(!contestService.isContestParticipant(id, StpUtil.getLoginIdAsInt())) {
+        if (contest.getAuthorId() != StpUtil.getLoginIdAsInt()) {
+            if (!contestService.isContestParticipant(id, StpUtil.getLoginIdAsInt())) {
                 throw new ForbiddenException("未参加比赛，无权查看该比赛题目列表");
             }
             Date current = new Date();
-            if(current.before(contest.getStartTime())) {
+            if (current.before(contest.getStartTime())) {
                 throw new ForbiddenException("比赛尚未开始，无法查看该比赛题目列表");
             }
         }
@@ -263,18 +307,18 @@ public class ContestController {
             throw new NotFoundException("该比赛不存在");
         }
         Problem problem = contestService.getContestProblem(id, problemNumber);
-        if(problem == null) {
+        if (problem == null) {
             throw new NotFoundException("该题目不存在");
         }
-        if(contest.getAuthorId() != StpUtil.getLoginIdAsInt()) {
-            if(!contestService.isContestParticipant(id, StpUtil.getLoginIdAsInt())) {
+        if (contest.getAuthorId() != StpUtil.getLoginIdAsInt()) {
+            if (!contestService.isContestParticipant(id, StpUtil.getLoginIdAsInt())) {
                 throw new ForbiddenException("未参加比赛，无权查看该题目");
             }
             Date current = new Date();
-            if(current.before(contest.getStartTime())) {
+            if (current.before(contest.getStartTime())) {
                 throw new ForbiddenException("比赛尚未开始，无法查看该题目");
             }
-            if(problem.getVisibility() == Visibility.PRIVATE) {
+            if (problem.getVisibility() == Visibility.PRIVATE) {
                 throw new ForbiddenException("该题仅作者可见");
             }
         }
@@ -288,29 +332,29 @@ public class ContestController {
                                     @NotNull(message = "请选择提交语言") Language submitLanguage,
                                     @NotBlank(message = "提交代码不能为空") String code) {
         Contest contest = contestService.getContestById(id);
-        if(contest == null) {
+        if (contest == null) {
             throw new NotFoundException("该比赛不存在");
         }
         Problem problem = contestService.getContestProblem(id, problemNumber);
-        if(problem == null) {
+        if (problem == null) {
             throw new NotFoundException("该题目不存在");
         }
-        if(contest.getAuthorId() != StpUtil.getLoginIdAsInt()) {
-            if(!contestService.isContestParticipant(id, StpUtil.getLoginIdAsInt())) {
+        if (contest.getAuthorId() != StpUtil.getLoginIdAsInt()) {
+            if (!contestService.isContestParticipant(id, StpUtil.getLoginIdAsInt())) {
                 throw new ForbiddenException("未参加比赛，无权提交代码");
             }
             Date current = new Date();
-            if(current.before(contest.getStartTime())) {
+            if (current.before(contest.getStartTime())) {
                 throw new ForbiddenException("比赛尚未开始，无法提交代码");
             }
-            if(problem.getVisibility() == Visibility.PRIVATE) {
+            if (problem.getVisibility() == Visibility.PRIVATE) {
                 throw new ForbiddenException("该题仅作者可提交代码");
             }
         }
-        if(!problem.getTestSet()) {
+        if (!problem.getTestSet()) {
             throw new BadRequestException("该题目尚未配置测试点");
         }
-        if(code.getBytes(StandardCharsets.UTF_8).length > maxCodeLength) {
+        if (code.getBytes(StandardCharsets.UTF_8).length > maxCodeLength) {
             throw new BadRequestException("代码长度过长，不能超过" + maxCodeLength + "字节");
         }
         Integer recordId = recordService.addRecord(StpUtil.getLoginIdAsInt(), problem.getId(), id, problemNumber, problem.getVisibility() == Visibility.PRIVATE, submitLanguage, code);
@@ -326,7 +370,7 @@ public class ContestController {
     public ArrayList<Record> getContestRecords(@PathVariable Integer id, String problemNumber, String username, Boolean onlySelf, Language submitLanguage, JudgeResult judgeResult, String orderBy, Boolean asc,
                                                @Min(value = 1, message = "页码不能小于1") Integer pageIndex,
                                                @Min(value = 1, message = "页面大小不能小于1") Integer pageSize) {
-        if(onlySelf) {
+        if (onlySelf) {
             username = (String) StpUtil.getSession().getAttribute("username");
         }
         return contestService.getContestRecords(id, problemNumber, username, submitLanguage, judgeResult, orderBy, asc, pageIndex, pageSize);
@@ -335,7 +379,7 @@ public class ContestController {
     @SaCheckLogin
     @GetMapping("/{id}/amount")
     public Integer countContestRecords(@PathVariable Integer id, String problemNumber, String username, Boolean onlySelf, Language submitLanguage, JudgeResult judgeResult) {
-        if(onlySelf) {
+        if (onlySelf) {
             username = (String) StpUtil.getSession().getAttribute("username");
         }
         return contestService.countContestRecords(id, problemNumber, username, submitLanguage, judgeResult);
@@ -345,18 +389,18 @@ public class ContestController {
     @GetMapping("/{id}/records/{recordId}")
     public Record getContestRecord(@PathVariable Integer id, @PathVariable Integer recordId) {
         Contest contest = contestService.getContestById(id);
-        if(contest == null) {
+        if (contest == null) {
             throw new NotFoundException("该比赛不存在");
         }
         Record record = contestService.getContestRecord(id, recordId);
-        if(record == null) {
+        if (record == null) {
             throw new NotFoundException("该记录不存在");
         }
-        if(record.getPersonal() && StpUtil.getLoginIdAsInt() != record.getUserId()) {   // todo 管理员可查看该记录
+        if (record.getPersonal() && StpUtil.getLoginIdAsInt() != record.getUserId()) {   // todo 管理员可查看该记录
             throw new ForbiddenException("该题目为私密，仅提交者和管理员可以查看该记录");
         }
         Date current = new Date();
-        if(!current.after(contest.getEndTime()) && StpUtil.getLoginIdAsInt() != record.getUserId()) {
+        if (!current.after(contest.getEndTime()) && StpUtil.getLoginIdAsInt() != record.getUserId()) {
             throw new ForbiddenException("该比赛尚未结束，仅提交者和管理员可以查看该记录");
         }
         return record;
@@ -366,18 +410,18 @@ public class ContestController {
     @GetMapping("/{id}/records/{recordId}/code")
     public String getContestCode(@PathVariable Integer id, @PathVariable Integer recordId, Language submitLanguage, Integer codeLength) {
         Contest contest = contestService.getContestById(id);
-        if(contest == null) {
+        if (contest == null) {
             throw new NotFoundException("该比赛不存在");
         }
         Record record = contestService.getContestRecord(id, recordId);
-        if(record == null) {
+        if (record == null) {
             throw new NotFoundException("该记录不存在");
         }
-        if(record.getPersonal() && StpUtil.getLoginIdAsInt() != record.getUserId()) {   // todo 管理员可查看该提交代码
+        if (record.getPersonal() && StpUtil.getLoginIdAsInt() != record.getUserId()) {   // todo 管理员可查看该提交代码
             throw new ForbiddenException("该题目为私密，仅提交者和管理员可以查看该提交代码");
         }
         Date current = new Date();
-        if(!current.after(contest.getEndTime()) && StpUtil.getLoginIdAsInt() != record.getUserId()) {
+        if (!current.after(contest.getEndTime()) && StpUtil.getLoginIdAsInt() != record.getUserId()) {
             throw new ForbiddenException("该比赛尚未结束，仅提交者和管理员可以查看该提交代码");
         }
         return recordService.getCode(recordId, submitLanguage, codeLength);
@@ -387,18 +431,18 @@ public class ContestController {
     @GetMapping("/{id}/records/{recordId}/compileOutput")
     public String getContestCompileOutput(@PathVariable Integer id, @PathVariable Integer recordId) {
         Contest contest = contestService.getContestById(id);
-        if(contest == null) {
+        if (contest == null) {
             throw new NotFoundException("该比赛不存在");
         }
         Record record = contestService.getContestRecord(id, recordId);
-        if(record == null) {
+        if (record == null) {
             throw new NotFoundException("该记录不存在");
         }
-        if(record.getPersonal() && StpUtil.getLoginIdAsInt() != record.getUserId()) {   // todo 管理员可查看该编译信息
+        if (record.getPersonal() && StpUtil.getLoginIdAsInt() != record.getUserId()) {   // todo 管理员可查看该编译信息
             throw new ForbiddenException("该题目为私密，仅提交者和管理员可以查看该编译信息");
         }
         Date current = new Date();
-        if(!current.after(contest.getEndTime()) && StpUtil.getLoginIdAsInt() != record.getUserId()) {
+        if (!current.after(contest.getEndTime()) && StpUtil.getLoginIdAsInt() != record.getUserId()) {
             throw new ForbiddenException("该比赛尚未结束，仅提交者和管理员可以查看该编译信息");
         }
         return record.getCompileOutput();

@@ -15,10 +15,7 @@ import pers.wjx.ojsb.repository.*;
 import pers.wjx.ojsb.service.ContestService;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Pattern;
 
 @Service
@@ -46,7 +43,7 @@ public class ContestServiceImpl implements ContestService {
     private ParticipationRepository participationRepository;
 
     @Override
-    public Integer addContest(Integer authorId, String name, ContestType type, String description, Boolean passwordSet, String password, Date startTime, Date endTime) {
+    public Integer addContest(Integer authorId, String name, ContestType type, String description, Boolean passwordSet, String password, Date startTime, Date endTime, Integer problemAmount) {
         Contest contest = new Contest();
         contest.setAuthorId(authorId);
         contest.setAuthorUsername(accountRepository.getUsernameById(authorId));
@@ -54,9 +51,10 @@ public class ContestServiceImpl implements ContestService {
         contest.setType(type);
         contest.setDescription(description);
         contest.setPasswordSet(passwordSet);
-        contest.setPassword(passwordSet ? SaSecureUtil.md5BySalt(password, passwordSalt) : null);
+        contest.setPassword(passwordSet ? password : null);
         contest.setStartTime(startTime);
         contest.setEndTime(endTime);
+        contest.setProblemAmount(problemAmount);
         contestRepository.addContest(contest);
         return contest.getId();
     }
@@ -154,6 +152,36 @@ public class ContestServiceImpl implements ContestService {
     }
 
     @Override
+    public ArrayList<Contest> getUserContestsByKey(Integer authorId, String key, Boolean showPractice, Boolean showCompetition, Boolean orderByStartTimeAsc, Integer pageIndex, Integer pageSize) {
+        key = key.trim();
+        ArrayList<Contest> contests = new ArrayList<>();
+        ArrayList<ContestType> types = getContestTypes(showPractice, showCompetition);
+        if (Pattern.matches("^\\d{1,8}$", key)) {
+            Contest contest = getContestById(Integer.valueOf(key));
+            if (contest != null && contest.getAuthorId().equals(authorId) && types.contains(contest.getType()) && !contest.getName().contains(key)) {
+                contests.add(contest);
+            }
+        }
+        contests.addAll(contestRepository.getUserContestsByName(authorId, key, types, orderByStartTimeAsc, (pageIndex - 1) * pageSize, pageSize));
+        return contests;
+    }
+
+    @Override
+    public Integer countUserContestsByKey(Integer authorId, String key, Boolean showPractice, Boolean showCompetition) {
+        key = key.trim();
+        int total = 0;
+        ArrayList<ContestType> types = getContestTypes(showPractice, showCompetition);
+        if (Pattern.matches("^\\d{1,8}$", key)) {
+            Contest contest = getContestById(Integer.valueOf(key));
+            if (contest != null && contest.getAuthorId().equals(authorId) && types.contains(contest.getType()) && !contest.getName().contains(key)) {
+                total++;
+            }
+        }
+        total += contestRepository.countUserContestsByName(authorId, key, types);
+        return total;
+    }
+
+    @Override
     public ArrayList<Record> getContestRecords(Integer id, String problemNumber, String username, Language submitLanguage, JudgeResult judgeResult, String orderBy, Boolean asc, Integer pageIndex, Integer pageSize) {
         Integer problemNumberInt = null;
         if (Pattern.matches("^\\d{1,8}$", problemNumber)) {
@@ -175,5 +203,20 @@ public class ContestServiceImpl implements ContestService {
     @Override
     public Record getContestRecord(Integer id, Integer recordId) {
         return recordRepository.getContestRecord(id, recordId);
+    }
+
+
+    private ArrayList<ContestType> getContestTypes(Boolean showPractice, Boolean showCompetition) {
+        if(!showPractice && !showCompetition) {
+            return new ArrayList<>(Arrays.asList(ContestType.PRAC, ContestType.COMP));
+        }
+        ArrayList<ContestType> types = new ArrayList<>();
+        if(showPractice) {
+            types.add(ContestType.PRAC);
+        }
+        if(showCompetition) {
+            types.add(ContestType.COMP);
+        }
+        return types;
     }
 }

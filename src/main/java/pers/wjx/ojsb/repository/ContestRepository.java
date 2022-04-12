@@ -21,4 +21,7 @@ public interface ContestRepository {
 
     Contest getContestById(Integer id);
 
+    ArrayList<Contest> getUserContestsByName(Integer authorId, String name, ArrayList<ContestType> types, Boolean orderByStartTimeAsc, Integer startIndex, Integer pageSize);
+
+    Integer countUserContestsByName(Integer authorId, String name, ArrayList<ContestType> types);
 }

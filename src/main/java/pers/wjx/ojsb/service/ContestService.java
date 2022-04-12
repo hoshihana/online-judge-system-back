@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.Date;
 
 public interface ContestService {
-    Integer addContest(Integer authorId, String name, ContestType type, String description, Boolean passwordSet, String password, Date startTime, Date endTime);
+    Integer addContest(Integer authorId, String name, ContestType type, String description, Boolean passwordSet, String password, Date startTime, Date endTime, Integer problemAmount);
 
     boolean updateContestDetail(Integer id, String name, ContestType type, String description, Boolean passwordSet, String password);
 
@@ -35,6 +35,10 @@ public interface ContestService {
     Problem getContestProblem(Integer id, Integer problemNumber);
 
     Contest getContestById(Integer id);
+
+    ArrayList<Contest> getUserContestsByKey(Integer authorId, String key, Boolean showPractice, Boolean showCompetition, Boolean orderByStartTimeAsc, Integer pageIndex, Integer pageSize);
+
+    Integer countUserContestsByKey(Integer authorId, String key, Boolean showPractice, Boolean showCompetition);
 
     ArrayList<Record> getContestRecords(Integer id, String problemNumber, String username, Language submitLanguage, JudgeResult judgeResult, String orderBy, Boolean asc, Integer pageIndex, Integer pageSize);
 
