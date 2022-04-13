@@ -43,7 +43,7 @@ public class ContestServiceImpl implements ContestService {
     private ParticipationRepository participationRepository;
 
     @Override
-    public Integer addContest(Integer authorId, String name, ContestType type, String description, Boolean passwordSet, String password, Date startTime, Date endTime, Integer problemAmount) {
+    public Integer addContest(Integer authorId, String name, ContestType type, String description, Boolean passwordSet, String password, Date startTime, Date endTime) {
         Contest contest = new Contest();
         contest.setAuthorId(authorId);
         contest.setAuthorUsername(accountRepository.getUsernameById(authorId));
@@ -54,14 +54,13 @@ public class ContestServiceImpl implements ContestService {
         contest.setPassword(passwordSet ? password : null);
         contest.setStartTime(startTime);
         contest.setEndTime(endTime);
-        contest.setProblemAmount(problemAmount);
         contestRepository.addContest(contest);
         return contest.getId();
     }
 
     @Override
     public boolean updateContestDetail(Integer id, String name, ContestType type, String description, Boolean passwordSet, String password) {
-        return contestRepository.updateContestDetail(id, name, type, description, passwordSet, passwordSet ? SaSecureUtil.md5BySalt(password, passwordSalt) : null);
+        return contestRepository.updateContestDetail(id, name, type, description, passwordSet, passwordSet ? password : null);
     }
 
     @Override
@@ -85,7 +84,7 @@ public class ContestServiceImpl implements ContestService {
     public boolean setContestProblems(Integer id, ArrayList<Integer> problemIds) {
         try {
             contestProblemRepository.deleteContestProblemsByContestId(id);
-            boolean success = true;
+            boolean success = contestRepository.setContestProblemAmount(id, problemIds.size());
             for (int i = 0; i < problemIds.size(); i++) {
                 success = success && contestProblemRepository.addContestProblem(id, problemIds.get(i), i + 1);
             }

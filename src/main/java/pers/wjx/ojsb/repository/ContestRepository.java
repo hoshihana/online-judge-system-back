@@ -15,6 +15,8 @@ public interface ContestRepository {
 
     boolean updateContestDetail(Integer id, String name, ContestType type, String description, Boolean passwordSet, String password);
 
+    boolean setContestProblemAmount(Integer id, Integer problemAmount);
+
     boolean setContestTime(Integer id, Date startTime, Date endTime);
 
     boolean setContestEndTime(Integer id, Date entTime);

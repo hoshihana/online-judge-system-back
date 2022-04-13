@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.Date;
 
 public interface ContestService {
-    Integer addContest(Integer authorId, String name, ContestType type, String description, Boolean passwordSet, String password, Date startTime, Date endTime, Integer problemAmount);
+    Integer addContest(Integer authorId, String name, ContestType type, String description, Boolean passwordSet, String password, Date startTime, Date endTime);
 
     boolean updateContestDetail(Integer id, String name, ContestType type, String description, Boolean passwordSet, String password);
 

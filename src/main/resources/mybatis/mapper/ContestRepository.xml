@@ -27,6 +27,11 @@
             end_time   = #{endTime}
         where id = #{id}
     </update>
+    <update id="setContestProblemAmount">
+        update contest
+        set problem_amount = #{problemAmount}
+        where id = #{id}
+    </update>
     <select id="getContestById" resultType="pers.wjx.ojsb.pojo.Contest">
         select *
         from contest

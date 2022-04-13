@@ -57,6 +57,8 @@ public class ContestController {
                 throw new BadRequestException("密码只能包含数字或字母");
             }
         }
+        startTime.setTime(startTime.getTime() - startTime.getTime() % (60 * 1000));
+        endTime.setTime(endTime.getTime() - endTime.getTime() % (60 * 1000));
         Date current = new Date();
         if (startTime.getTime() - current.getTime() < 4 * 60 * 1000) {
             throw new BadRequestException("开始时间必须至少在当前时间的5分钟之后");
@@ -67,7 +69,7 @@ public class ContestController {
         if (!contestService.validateProblemIds(StpUtil.getLoginIdAsInt(), new ArrayList<>(Arrays.asList(problemIds)))) {
             throw new BadRequestException("题目列表有重复题目或者非本人创建的题目");
         }
-        Integer id = contestService.addContest(StpUtil.getLoginIdAsInt(), name, type, description, passwordSet, password, startTime, endTime, problemIds.length);
+        Integer id = contestService.addContest(StpUtil.getLoginIdAsInt(), name, type, description, passwordSet, password, startTime, endTime);
         if (id == null) {
             throw new InternalServerErrorException("比赛创建失败");
         }
@@ -133,7 +135,7 @@ public class ContestController {
 
 
     @SaCheckLogin
-    @PatchMapping("/{id}/detail")   // 比赛创建后任何阶段均能修改比赛详情
+    @PatchMapping("/{id}/detail")   // 比赛结束前均可以修改比赛详情
     public String updateContestDetail(@PathVariable Integer id,
                                       @Length(min = 1, max = 40, message = "比赛名称长度要在1到40之间") String name,
                                       @NotNull(message = "比赛类型不能为空") ContestType type, String description,
@@ -144,6 +146,10 @@ public class ContestController {
         }
         if (contest.getAuthorId() != StpUtil.getLoginIdAsInt()) {
             throw new ForbiddenException("无权编辑该比赛");
+        }
+        Date current = new Date();
+        if(!current.before(contest.getEndTime())) {
+            throw new BadRequestException("该比赛已结束，无法进行编辑");
         }
         if (password != null) {
             if (password.length() < 6 || password.length() > 16) {
@@ -165,6 +171,8 @@ public class ContestController {
     public String updateContestTime(@PathVariable Integer id,
                                     @NotNull(message = "开始时间不能为空") Date startTime,
                                     @NotNull(message = "结束时间不能为空") Date endTime) {
+        startTime.setTime(startTime.getTime() - startTime.getTime() % (60 * 1000));
+        endTime.setTime(endTime.getTime() - endTime.getTime() % (60 * 1000));
         Contest contest = contestService.getContestById(id);
         if (contest == null) {
             throw new NotFoundException("该比赛不存在");
@@ -194,6 +202,8 @@ public class ContestController {
     public String resetContest(@PathVariable Integer id,
                                @NotNull(message = "开始时间不能为空") Date startTime,
                                @NotNull(message = "结束时间不能为空") Date endTime) {
+        startTime.setTime(startTime.getTime() - startTime.getTime() % (60 * 1000));
+        endTime.setTime(endTime.getTime() - endTime.getTime() % (60 * 1000));
         Contest contest = contestService.getContestById(id);
         if (contest == null) {
             throw new NotFoundException("该比赛不存在");
@@ -221,6 +231,7 @@ public class ContestController {
     @SaCheckLogin
     @PatchMapping("/{id}/endTime")  // 修改比赛结束时间（比赛进行时/结束后可用）
     public String updateContestEndTime(@PathVariable Integer id, @NotNull(message = "结束时间不能为空") Date endTime) {
+        endTime.setTime(endTime.getTime() - endTime.getTime() % (60 * 1000));
         Contest contest = contestService.getContestById(id);
         if (contest == null) {
             throw new NotFoundException("该比赛不存在");
@@ -250,11 +261,14 @@ public class ContestController {
             throw new NotFoundException("该比赛不存在");
         }
         if (contest.getAuthorId() != StpUtil.getLoginIdAsInt()) {
-            throw new ForbiddenException("无权设置比赛题目列表");
+            throw new ForbiddenException("无权设置该比赛题目列表");
         }
         Date current = new Date();
         if (!current.before(contest.getStartTime())) {
             throw new BadRequestException("比赛已开始或已结束，无法设置题目列表");
+        }
+        if (!contestService.validateProblemIds(StpUtil.getLoginIdAsInt(), new ArrayList<>(Arrays.asList(problemIds)))) {
+            throw new BadRequestException("题目列表有重复题目或者非本人创建的题目");
         }
         if (contestService.setContestProblems(id, (ArrayList<Integer>) Arrays.asList(problemIds))) {
             return "题目列表设置成功";
