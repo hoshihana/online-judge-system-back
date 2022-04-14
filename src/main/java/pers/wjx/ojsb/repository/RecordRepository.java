@@ -41,4 +41,6 @@ public interface RecordRepository {
     boolean setJudgeResult(Integer id, JudgeResult judgeResult, Integer executeTime, Integer executeMemory);
 
     boolean setCompileOutput(Integer id, String compileOutput);
+
+    Integer deleteRecordsByContestId(Integer contestId);
 }

@@ -19,7 +19,7 @@ public interface ContestRepository {
 
     boolean setContestTime(Integer id, Date startTime, Date endTime);
 
-    boolean setContestEndTime(Integer id, Date entTime);
+    boolean setContestEndTime(Integer id, Date endTime);
 
     Contest getContestById(Integer id);
 

@@ -151,7 +151,7 @@ public class ContestController {
         if(!current.before(contest.getEndTime())) {
             throw new BadRequestException("该比赛已结束，无法进行编辑");
         }
-        if (password != null) {
+        if (passwordSet) {
             if (password.length() < 6 || password.length() > 16) {
                 throw new BadRequestException("密码长度需在6到16位之间");
             }
@@ -171,7 +171,7 @@ public class ContestController {
     public String updateContestTime(@PathVariable Integer id,
                                     @NotNull(message = "开始时间不能为空") Date startTime,
                                     @NotNull(message = "结束时间不能为空") Date endTime) {
-        startTime.setTime(startTime.getTime() - startTime.getTime() % (60 * 1000));
+        startTime.setTime(startTime.getTime() - startTime. getTime() % (60 * 1000));
         endTime.setTime(endTime.getTime() - endTime.getTime() % (60 * 1000));
         Contest contest = contestService.getContestById(id);
         if (contest == null) {
@@ -215,7 +215,7 @@ public class ContestController {
         if (current.before(contest.getStartTime())) {
             throw new BadRequestException("比赛尚未开始，无法重置比赛");
         }
-        if (startTime.getTime() - current.getTime() < (4 * 60 + 30) * 1000) {
+        if (startTime.getTime() - current.getTime() < 4 * 60 * 1000) {
             throw new BadRequestException("开始时间必须至少在当前时间的5分钟之后");
         }
         if (!endTime.after(startTime)) {
@@ -243,7 +243,7 @@ public class ContestController {
         if (current.before(contest.getStartTime())) {
             throw new BadRequestException("比赛尚未开始，无法修改比赛结束时间");
         }
-        if (endTime.getTime() - current.getTime() < (4 * 60 + 30) * 1000) {
+        if (endTime.getTime() - current.getTime() < 4 * 60 * 1000) {
             throw new BadRequestException("结束时间必须至少在当前时间的5分钟之后");
         }
         if (contestService.setContestEndTime(id, endTime)) {
@@ -270,7 +270,7 @@ public class ContestController {
         if (!contestService.validateProblemIds(StpUtil.getLoginIdAsInt(), new ArrayList<>(Arrays.asList(problemIds)))) {
             throw new BadRequestException("题目列表有重复题目或者非本人创建的题目");
         }
-        if (contestService.setContestProblems(id, (ArrayList<Integer>) Arrays.asList(problemIds))) {
+        if (contestService.setContestProblems(id, new ArrayList<>(Arrays.asList(problemIds)))) {
             return "题目列表设置成功";
         } else {
             throw new InternalServerErrorException("题目列表设置失败");

@@ -10,7 +10,6 @@ import pers.wjx.ojsb.pojo.*;
 import pers.wjx.ojsb.pojo.enumeration.ContestType;
 import pers.wjx.ojsb.pojo.enumeration.JudgeResult;
 import pers.wjx.ojsb.pojo.enumeration.Language;
-import pers.wjx.ojsb.pojo.enumeration.Visibility;
 import pers.wjx.ojsb.repository.*;
 import pers.wjx.ojsb.service.ContestService;
 
@@ -42,6 +41,9 @@ public class ContestServiceImpl implements ContestService {
     @Resource
     private ParticipationRepository participationRepository;
 
+    @Resource
+    private ContestProblemUserRepository contestProblemUserRepository;
+
     @Override
     public Integer addContest(Integer authorId, String name, ContestType type, String description, Boolean passwordSet, String password, Date startTime, Date endTime) {
         Contest contest = new Contest();
@@ -69,9 +71,20 @@ public class ContestServiceImpl implements ContestService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public boolean resetContest(Integer id, Date startTime, Date endTime) {
-        // todo 清除所有参赛记录和提交记录，并重设开始、结束时间
-        return false;
+        try {
+            participationRepository.deleteParticipationsByContestId(id);
+            contestProblemUserRepository.deleteRelationsByContestId(id);
+            recordRepository.deleteRecordsByContestId(id);      // todo 相关judge未删除
+            contestProblemRepository.resetContestProblem(id);
+            contestRepository.setContestTime(id, startTime, endTime);
+            return true;
+        } catch (Exception ex) {
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+            ex.printStackTrace();
+            return false;
+        }
     }
 
     @Override
@@ -104,7 +117,7 @@ public class ContestServiceImpl implements ContestService {
                 return false;
             } else {
                 Problem problem = problemRepository.getProblemById(problemId);
-                if (problem == null || problem.getAuthorId() != authorId) {
+                if (problem == null || !problem.getAuthorId().equals(authorId)) {
                     return false;
                 } else {
                     set.add(problemId);

@@ -42,6 +42,10 @@
         where problem_id = #{problemId}
           and contest_id is not null
     </update>
+    <delete id="deleteRecordsByContestId">
+        delete from record
+        where contest_id = #{contestId}
+    </delete>
     <select id="getRecords" resultType="pers.wjx.ojsb.pojo.Record">
         select *
         from record

@@ -5,6 +5,11 @@
         insert into contest_problem(contest_id, problem_id, problem_number)
         values (#{contestId}, #{problemId}, #{problemNumber})
     </insert>
+    <update id="resetContestProblem">
+        update contest_problem
+        set submit = 0, accept = 0
+        where contest_id = #{contestId}
+    </update>
     <delete id="deleteContestProblemsByContestId">
         delete
         from contest_problem
