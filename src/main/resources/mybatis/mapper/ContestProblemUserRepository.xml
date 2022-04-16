@@ -5,4 +5,10 @@
         delete from contest_problem_user
         where contest_id = #{contestId}
     </delete>
+    <select id="getRelationsByContestIdAndUserId" resultType="pers.wjx.ojsb.pojo.ContestProblemUserRelation">
+        select *
+        from contest_problem_user
+        where contest_id = #{contestId} and user_id = #{userId}
+        order by problem_number asc
+    </select>
 </mapper>

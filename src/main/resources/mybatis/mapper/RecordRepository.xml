@@ -3,7 +3,7 @@
 <mapper namespace="pers.wjx.ojsb.repository.RecordRepository">
     <insert id="addRecord" useGeneratedKeys="true" keyProperty="id">
         insert into record(user_id, username, problem_id, contest_id, problem_number, submit_time, code_length, submit_language, personal)
-        values (#{userId}, #{username}, #{problemId}, #{contestId}, #{problem_number}, #{submitTime}, #{codeLength}, #{submitLanguage}, #{personal})
+        values (#{userId}, #{username}, #{problemId}, #{contestId}, #{problemNumber}, #{submitTime}, #{codeLength}, #{submitLanguage}, #{personal})
     </insert>
     <update id="setJudgeResult">
         update record

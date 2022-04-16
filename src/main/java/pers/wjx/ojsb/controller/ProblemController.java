@@ -146,7 +146,7 @@ public class ProblemController {
         if(problem.getVisibility() != Visibility.PUBLIC && problem.getAuthorId() != StpUtil.getLoginIdAsInt()){
             throw new ForbiddenException("无权查看该题目各用户的提交/通过次数");
         }
-        return problemService.getProblemUserRelation(userId, problemId);    // 可能不存在表项，返回null
+        return problemService.getProblemUserRelation(userId, problemId);    // todo 可能不存在表项，返回null
     }
 
     @SaCheckLogin

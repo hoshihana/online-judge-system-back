@@ -7,10 +7,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import pers.wjx.ojsb.exception.*;
-import pers.wjx.ojsb.pojo.Contest;
-import pers.wjx.ojsb.pojo.Problem;
-import pers.wjx.ojsb.pojo.ProblemEntry;
-import pers.wjx.ojsb.pojo.Record;
+import pers.wjx.ojsb.pojo.*;
 import pers.wjx.ojsb.pojo.enumeration.ContestType;
 import pers.wjx.ojsb.pojo.enumeration.JudgeResult;
 import pers.wjx.ojsb.pojo.enumeration.Language;
@@ -337,6 +334,12 @@ public class ContestController {
             }
         }
         return problem;
+    }
+
+    @SaCheckLogin
+    @GetMapping("/{id}/problems/users/{userId}")
+    public ArrayList<ContestProblemUserRelation> getContestProblemUserRelations(@PathVariable Integer id, @PathVariable Integer userId) {
+        return null;    // todo 接口待完善
     }
 
     @SaCheckLogin

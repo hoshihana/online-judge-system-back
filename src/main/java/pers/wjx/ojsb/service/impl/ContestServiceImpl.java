@@ -128,6 +128,11 @@ public class ContestServiceImpl implements ContestService {
     }
 
     @Override
+    public ArrayList<ContestProblemUserRelation> getContestProblemUserRelations(Integer id, Integer userId) {
+        return contestProblemUserRepository.getRelationsByContestIdAndUserId(id, userId);
+    }
+
+    @Override
     public boolean participateContest(Integer id, Integer userId, String nickname, String password) throws BadRequestException {
         Contest contest = contestRepository.getContestById(id);
         if (!contest.getPasswordSet() || contest.getPassword().equals(SaSecureUtil.md5BySalt(password, passwordSalt))) {

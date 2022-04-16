@@ -1,9 +1,6 @@
 package pers.wjx.ojsb.service;
 
-import pers.wjx.ojsb.pojo.Contest;
-import pers.wjx.ojsb.pojo.Problem;
-import pers.wjx.ojsb.pojo.ProblemEntry;
-import pers.wjx.ojsb.pojo.Record;
+import pers.wjx.ojsb.pojo.*;
 import pers.wjx.ojsb.pojo.enumeration.ContestType;
 import pers.wjx.ojsb.pojo.enumeration.JudgeResult;
 import pers.wjx.ojsb.pojo.enumeration.Language;
@@ -29,6 +26,8 @@ public interface ContestService {
     boolean setContestProblems(Integer id, ArrayList<Integer> problemIds);
 
     boolean validateProblemIds(Integer authorId, ArrayList<Integer> problemIds);
+
+    ArrayList<ContestProblemUserRelation> getContestProblemUserRelations(Integer id, Integer userId);
 
     ArrayList<ProblemEntry> getContestProblemEntries(Integer id);
 
