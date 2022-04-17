@@ -133,13 +133,19 @@ public class ContestServiceImpl implements ContestService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public boolean participateContest(Integer id, Integer userId, String nickname, String password) throws BadRequestException {
         Contest contest = contestRepository.getContestById(id);
-        if (!contest.getPasswordSet() || contest.getPassword().equals(SaSecureUtil.md5BySalt(password, passwordSalt))) {
+        ArrayList<ProblemEntry> contestProblemEntries = contestProblemRepository.getContestProblemEntries(id);
+        if (!contest.getPasswordSet() || contest.getPassword().equals(password)) {
             try {
                 participationRepository.addParticipation(id, userId, accountRepository.getUsernameById(userId), nickname);
+                for(int i = 0; i < contestProblemEntries.size(); i++) {
+                    contestProblemUserRepository.addRelation(id, contestProblemEntries.get(i).getId(), userId, i + 1);
+                }
                 return true;
             } catch (Exception ex) {
+                TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
                 throw new BadRequestException("无法重复参加比赛");
             }
         } else {

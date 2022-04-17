@@ -11,5 +11,7 @@ import java.util.ArrayList;
 public interface ContestProblemUserRepository {
     Integer deleteRelationsByContestId(Integer contestId);
 
+    Boolean addRelation(Integer contestId, Integer problemId, Integer userId, Integer problemNumber);
+
     ArrayList<ContestProblemUserRelation> getRelationsByContestIdAndUserId(Integer contestId, Integer userId);
 }

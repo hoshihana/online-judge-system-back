@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="pers.wjx.ojsb.repository.ContestProblemUserRepository">
+    <insert id="addRelation">
+        insert into contest_problem_user(contest_id, problem_id, user_id, problem_number)
+        values (#{contestId}, #{problemId}, #{userId}, #{problemNumber})
+    </insert>
     <delete id="deleteRelationsByContestId">
         delete from contest_problem_user
         where contest_id = #{contestId}

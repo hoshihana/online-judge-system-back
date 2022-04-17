@@ -284,11 +284,24 @@ public class ContestController {
         if (contest.getAuthorId() == StpUtil.getLoginIdAsInt()) {    // todo 管理员和作者均无法参赛
             throw new ForbiddenException("比赛作者无法参加比赛");
         }
+        Date current = new Date();
+        if(current.before(contest.getStartTime())) {
+            throw new BadRequestException("比赛尚未开始");
+        }
+        if(nickname != null && nickname.length() > 30) {
+            throw new BadRequestException("参赛昵称长度不能超过30");
+        }
         if (contestService.participateContest(id, StpUtil.getLoginIdAsInt(), nickname, password)) {
             return "比赛参加成功";
         } else {
-            throw new UnauthorizedException("比赛密码错误");
+            throw new UnauthorizedException("参赛密码错误");
         }
+    }
+
+    @SaCheckLogin
+    @PostMapping("/{id}/users/{userId}/isParticipant")
+    public Boolean isParticipant(@PathVariable Integer id, @PathVariable Integer userId) {
+        return contestService.isContestParticipant(id, userId);
     }
 
     @SaCheckLogin
@@ -339,7 +352,7 @@ public class ContestController {
     @SaCheckLogin
     @GetMapping("/{id}/problems/users/{userId}")
     public ArrayList<ContestProblemUserRelation> getContestProblemUserRelations(@PathVariable Integer id, @PathVariable Integer userId) {
-        return null;    // todo 接口待完善
+        return contestService.getContestProblemUserRelations(id, userId);
     }
 
     @SaCheckLogin
