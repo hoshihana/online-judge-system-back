@@ -29,9 +29,13 @@ public interface ContestService {
 
     ArrayList<ContestProblemUserRelation> getContestProblemUserRelations(Integer id, Integer userId);
 
+    ContestProblemUserRelation getContestProblemUserRelation(Integer id, Integer problemNumber, Integer userId);
+
     ArrayList<ProblemEntry> getContestProblemEntries(Integer id);
 
     Problem getContestProblem(Integer id, Integer problemNumber);
+
+    TryPassAmountPair getContestTryPassAmountPair(Integer id, Integer problemNumber);
 
     Contest getContestById(Integer id);
 
@@ -43,5 +47,9 @@ public interface ContestService {
 
     Integer countContestRecords(Integer id, String problemNumber, String username, Language submitLanguage, JudgeResult judgeResult);
 
+    ArrayList<Record> getContestProblemRecentRecords(Integer id, Integer problemNumber, Integer userId, Integer limit);
+
     Record getContestRecord(Integer id, Integer recordId);
+
+    Integer submitCode(Integer id, Integer problemNumber, Problem problem, Integer userId, Language submitLanguage, String code);
 }

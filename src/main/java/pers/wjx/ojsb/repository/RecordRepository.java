@@ -22,6 +22,8 @@ public interface RecordRepository {
 
     Integer countContestRecords(Integer contestId, Integer problemNumber, String username, Language submitLanguage, JudgeResult judgeResult);
 
+    ArrayList<Record> getContestRecentRecords(Integer contestId, Integer problemNumber, Integer userId, Integer limit);
+
     Record getRecord(Integer id);
 
     Record getContestRecord(Integer contestId, Integer recordId);

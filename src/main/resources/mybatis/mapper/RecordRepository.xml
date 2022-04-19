@@ -176,4 +176,13 @@
         where id = #{recordId}
             and contest_id = #{contestId}
     </select>
+    <select id="getContestRecentRecords" resultType="pers.wjx.ojsb.pojo.Record">
+        select *
+        from record
+        where contest_id = #{contestId}
+            and problem_number = #{problemNumber}
+            and user_id = #{userId}
+        order by id desc
+            limit #{limit}
+    </select>
 </mapper>

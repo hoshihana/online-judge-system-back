@@ -10,10 +10,7 @@ import org.springframework.web.client.RestTemplate;
 import pers.wjx.ojsb.pojo.*;
 import pers.wjx.ojsb.pojo.enumeration.JudgeResult;
 import pers.wjx.ojsb.pojo.enumeration.Language;
-import pers.wjx.ojsb.repository.JudgeRepository;
-import pers.wjx.ojsb.repository.ProblemRepository;
-import pers.wjx.ojsb.repository.ProblemUserRepository;
-import pers.wjx.ojsb.repository.RecordRepository;
+import pers.wjx.ojsb.repository.*;
 import pers.wjx.ojsb.service.JudgeService;
 
 import javax.annotation.Resource;
@@ -35,6 +32,12 @@ public class JudgeServiceImpl implements JudgeService {
 
     @Resource
     private ProblemUserRepository problemUserRepository;
+
+    @Resource
+    private ContestProblemRepository contestProblemRepository;
+
+    @Resource
+    private ContestProblemUserRepository contestProblemUserRepository;
 
     @Value("${max-wall-time-limit}")
     private Integer maxWallTimeLimit;
@@ -286,8 +289,13 @@ public class JudgeServiceImpl implements JudgeService {
                                     maxMemory = Math.max(maxMemory, acceptedJudge.getExecuteMemory());
                                 }
                                 recordRepository.setJudgeResult(record.getId(), JudgeResult.AC, maxTime, maxMemory);
-                                problemRepository.increaseAccept(record.getProblemId());
-                                problemUserRepository.increaseAccept(record.getUserId(), record.getProblemId());
+                                if(record.getContestId() == null) {
+                                    problemRepository.increaseAccept(record.getProblemId());
+                                    problemUserRepository.increaseAccept(record.getUserId(), record.getProblemId());
+                                } else {
+                                    contestProblemRepository.increaseContestAccept(record.getContestId(), record.getProblemNumber());
+                                    contestProblemUserRepository.increaseContestAccept(record.getContestId(), record.getProblemNumber(), record.getUserId());
+                                }
                             }
                         } else if (judge.getJudgeResult() == JudgeResult.CE) {
                             recordRepository.setCompileOutput(judge.getRecordId(), judgeResultResponse.getCompileOutput());

@@ -19,4 +19,8 @@ public interface ContestProblemRepository {
     boolean addContestProblem(Integer contestId, Integer problemId, Integer problemNumber);
 
     boolean resetContestProblem(Integer contestId);
+
+    boolean increaseContestSubmit(Integer contestId, Integer problemNumber);
+
+    boolean increaseContestAccept(Integer contestId, Integer problemNumber);
 }

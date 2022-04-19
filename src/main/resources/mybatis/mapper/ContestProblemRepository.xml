@@ -10,6 +10,18 @@
         set submit = 0, accept = 0
         where contest_id = #{contestId}
     </update>
+    <update id="increaseContestSubmit">
+        update contest_problem
+        set submit = submit + 1
+        where contest_id = #{contestId}
+            and problem_number = #{problemNumber}
+    </update>
+    <update id="increaseContestAccept">
+        update contest_problem
+        set accept = accept + 1
+        where contest_id = #{contestId}
+          and problem_number = #{problemNumber}
+    </update>
     <delete id="deleteContestProblemsByContestId">
         delete
         from contest_problem
@@ -45,7 +57,7 @@
         from (select *
               from contest_problem
               where contest_id = #{contestId}
-                and problem_number = #{problemNUmber}) as contest_problem
+                and problem_number = #{problemNumber}) as contest_problem
                  inner join problem on contest_problem.problem_id = problem.id
     </select>
 

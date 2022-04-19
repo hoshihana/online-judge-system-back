@@ -5,14 +5,51 @@
         insert into contest_problem_user(contest_id, problem_id, user_id, problem_number)
         values (#{contestId}, #{problemId}, #{userId}, #{problemNumber})
     </insert>
+    <update id="increaseContestSubmit">
+        update contest_problem_user
+        set submit = submit + 1
+        where contest_id = #{contestId}
+            and problem_number = #{problemNumber}
+            and user_id = #{userId}
+    </update>
+    <update id="increaseContestAccept">
+        update contest_problem_user
+        set accept = accept + 1
+        where contest_id = #{contestId}
+          and problem_number = #{problemNumber}
+          and user_id = #{userId}
+    </update>
     <delete id="deleteRelationsByContestId">
-        delete from contest_problem_user
+        delete
+        from contest_problem_user
         where contest_id = #{contestId}
     </delete>
     <select id="getRelationsByContestIdAndUserId" resultType="pers.wjx.ojsb.pojo.ContestProblemUserRelation">
         select *
         from contest_problem_user
-        where contest_id = #{contestId} and user_id = #{userId}
+        where contest_id = #{contestId}
+          and user_id = #{userId}
         order by problem_number asc
+    </select>
+    <select id="countTriedParticipant" resultType="java.lang.Integer">
+        select count(*)
+        from contest_problem_user
+        where contest_id = #{contestId}
+          and problem_number = #{problemNumber}
+          and submit > 0
+    </select>
+    <select id="countPassedParticipant" resultType="java.lang.Integer">
+        select count(*)
+        from contest_problem_user
+        where contest_id = #{contestId}
+          and problem_number = #{problemNumber}
+          and accept > 0
+    </select>
+    <select id="getRelation" resultType="pers.wjx.ojsb.pojo.ContestProblemUserRelation">
+        select *
+        from contest_problem_user
+        where contest_id = #{contestId}
+            and problem_number = #{problemNumber}
+            and user_id = #{userId}
     </select>
 </mapper>

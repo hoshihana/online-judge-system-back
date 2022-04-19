@@ -5,15 +5,20 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
+import org.springframework.web.bind.annotation.PathVariable;
 import pers.wjx.ojsb.exception.BadRequestException;
 import pers.wjx.ojsb.pojo.*;
 import pers.wjx.ojsb.pojo.enumeration.ContestType;
 import pers.wjx.ojsb.pojo.enumeration.JudgeResult;
 import pers.wjx.ojsb.pojo.enumeration.Language;
+import pers.wjx.ojsb.pojo.enumeration.Visibility;
 import pers.wjx.ojsb.repository.*;
 import pers.wjx.ojsb.service.ContestService;
+import pers.wjx.ojsb.service.RecordService;
 
 import javax.annotation.Resource;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -43,6 +48,9 @@ public class ContestServiceImpl implements ContestService {
 
     @Resource
     private ContestProblemUserRepository contestProblemUserRepository;
+
+    @Resource
+    private RecordService recordService;
 
     @Override
     public Integer addContest(Integer authorId, String name, ContestType type, String description, Boolean passwordSet, String password, Date startTime, Date endTime) {
@@ -133,6 +141,11 @@ public class ContestServiceImpl implements ContestService {
     }
 
     @Override
+    public ContestProblemUserRelation getContestProblemUserRelation(Integer id, Integer problemNumber, Integer userId) {
+        return contestProblemUserRepository.getRelation(id, problemNumber, userId);
+    }
+
+    @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean participateContest(Integer id, Integer userId, String nickname, String password) throws BadRequestException {
         Contest contest = contestRepository.getContestById(id);
@@ -167,6 +180,11 @@ public class ContestServiceImpl implements ContestService {
     @Override
     public Problem getContestProblem(Integer id, Integer problemNumber) {
         return contestProblemRepository.getContestProblem(id, problemNumber);
+    }
+
+    @Override
+    public TryPassAmountPair getContestTryPassAmountPair(Integer id, Integer problemNumber) {
+        return new TryPassAmountPair(contestProblemUserRepository.countTriedParticipant(id, problemNumber), contestProblemUserRepository.countPassedParticipant(id, problemNumber));
     }
 
     @Override
@@ -228,6 +246,24 @@ public class ContestServiceImpl implements ContestService {
         return recordRepository.getContestRecord(id, recordId);
     }
 
+    @Override
+    public ArrayList<Record> getContestProblemRecentRecords(Integer id, Integer problemNumber, Integer userId, Integer limit) {
+        return recordRepository.getContestRecentRecords(id, problemNumber, userId, limit);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Integer submitCode(Integer id, Integer problemNumber, Problem problem, Integer userId, Language submitLanguage, String code) {
+        try {
+            contestProblemRepository.increaseContestSubmit(id, problemNumber);
+            contestProblemUserRepository.increaseContestSubmit(id, problemNumber, userId);
+            return recordService.addRecord(userId, problem.getId(), id, problemNumber, problem.getVisibility() == Visibility.PRIVATE, submitLanguage, code);
+        } catch (Exception ex) {
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+            ex.printStackTrace();
+            return null;
+        }
+    }
 
     private ArrayList<ContestType> getContestTypes(Boolean showPractice, Boolean showCompetition) {
         if(!showPractice && !showCompetition) {
@@ -242,4 +278,6 @@ public class ContestServiceImpl implements ContestService {
         }
         return types;
     }
+
+
 }

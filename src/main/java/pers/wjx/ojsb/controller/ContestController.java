@@ -350,9 +350,41 @@ public class ContestController {
     }
 
     @SaCheckLogin
+    @GetMapping("/{id}/problems/{problemNumber}/status")
+    public TryPassAmountPair getContestProblemTryPassAmount(@PathVariable Integer id, @PathVariable Integer problemNumber) {
+        Contest contest = contestService.getContestById(id);
+        if (contest == null) {
+            throw new NotFoundException("该比赛不存在");
+        }
+        Problem problem = contestService.getContestProblem(id, problemNumber);
+        if (problem == null) {
+            throw new NotFoundException("该题目不存在");
+        }
+        if (contest.getAuthorId() != StpUtil.getLoginIdAsInt()) {
+            if (!contestService.isContestParticipant(id, StpUtil.getLoginIdAsInt())) {
+                throw new ForbiddenException("未参加比赛，无权查看该题目");
+            }
+            Date current = new Date();
+            if (current.before(contest.getStartTime())) {
+                throw new ForbiddenException("比赛尚未开始，无法查看该题目");
+            }
+            if (problem.getVisibility() == Visibility.PRIVATE) {
+                throw new ForbiddenException("该题仅作者可见");
+            }
+        }
+        return contestService.getContestTryPassAmountPair(id ,problemNumber);
+    }
+
+    @SaCheckLogin
     @GetMapping("/{id}/problems/users/{userId}")
     public ArrayList<ContestProblemUserRelation> getContestProblemUserRelations(@PathVariable Integer id, @PathVariable Integer userId) {
         return contestService.getContestProblemUserRelations(id, userId);
+    }
+
+    @SaCheckLogin
+    @GetMapping("/{id}/problems/{problemNumber}/users/{userId}")
+    public ContestProblemUserRelation getContestProblemUserRelation(@PathVariable Integer id, @PathVariable Integer problemNumber, @PathVariable Integer userId) {
+        return contestService.getContestProblemUserRelation(id, problemNumber, userId);
     }
 
     @SaCheckLogin
@@ -387,7 +419,7 @@ public class ContestController {
         if (code.getBytes(StandardCharsets.UTF_8).length > maxCodeLength) {
             throw new BadRequestException("代码长度过长，不能超过" + maxCodeLength + "字节");
         }
-        Integer recordId = recordService.addRecord(StpUtil.getLoginIdAsInt(), problem.getId(), id, problemNumber, problem.getVisibility() == Visibility.PRIVATE, submitLanguage, code);
+        Integer recordId = contestService.submitCode(id, problemNumber, problem, StpUtil.getLoginIdAsInt(), submitLanguage, code);
         if (recordId == null) {
             throw new InternalServerErrorException("提交失败");
         } else {
@@ -396,7 +428,33 @@ public class ContestController {
     }
 
     @SaCheckLogin
-    @GetMapping("/{id}/records")
+    @GetMapping("/{id}/problems/{problemNumber}/records/recent")
+    public ArrayList<Record> getContestProblemRecentRecord(@PathVariable Integer id, @PathVariable Integer problemNumber, @Min(value = 0, message = "返回记录条数必须为非负数") Integer limit) {
+        Contest contest = contestService.getContestById(id);
+        if (contest == null) {
+            throw new NotFoundException("该比赛不存在");
+        }
+        Problem problem = contestService.getContestProblem(id, problemNumber);
+        if (problem == null) {
+            throw new NotFoundException("该题目不存在");
+        }
+        if (contest.getAuthorId() != StpUtil.getLoginIdAsInt()) {
+            if (!contestService.isContestParticipant(id, StpUtil.getLoginIdAsInt())) {
+                throw new ForbiddenException("未参加比赛，无权查看该题目最近提交");
+            }
+            Date current = new Date();
+            if (current.before(contest.getStartTime())) {
+                throw new ForbiddenException("比赛尚未开始，无法查看该题目最近提交");
+            }
+            if (problem.getVisibility() == Visibility.PRIVATE) {
+                throw new ForbiddenException("该题仅作者可见");
+            }
+        }
+        return contestService.getContestProblemRecentRecords(id, problemNumber, StpUtil.getLoginIdAsInt(),limit);
+    }
+
+    @SaCheckLogin
+    @GetMapping("/{id}/records")    // todo 方法待鉴权
     public ArrayList<Record> getContestRecords(@PathVariable Integer id, String problemNumber, String username, Boolean onlySelf, Language submitLanguage, JudgeResult judgeResult, String orderBy, Boolean asc,
                                                @Min(value = 1, message = "页码不能小于1") Integer pageIndex,
                                                @Min(value = 1, message = "页面大小不能小于1") Integer pageSize) {
@@ -407,7 +465,7 @@ public class ContestController {
     }
 
     @SaCheckLogin
-    @GetMapping("/{id}/amount")
+    @GetMapping("/{id}/amount")     // todo 方法待鉴权
     public Integer countContestRecords(@PathVariable Integer id, String problemNumber, String username, Boolean onlySelf, Language submitLanguage, JudgeResult judgeResult) {
         if (onlySelf) {
             username = (String) StpUtil.getSession().getAttribute("username");
