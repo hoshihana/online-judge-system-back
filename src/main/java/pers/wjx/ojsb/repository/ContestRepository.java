@@ -23,6 +23,10 @@ public interface ContestRepository {
 
     Contest getContestById(Integer id);
 
+    ArrayList<Contest> getContestsByName(String name, Integer startIndex, Integer pageSize);
+
+    Integer countContestsByName(String name);
+
     ArrayList<Contest> getUserContestsByName(Integer authorId, String name, ArrayList<ContestType> types, Boolean orderByStartTimeAsc, Integer startIndex, Integer pageSize);
 
     Integer countUserContestsByName(Integer authorId, String name, ArrayList<ContestType> types);

@@ -39,6 +39,10 @@ public interface ContestService {
 
     Contest getContestById(Integer id);
 
+    ArrayList<Contest> getContestsByKey(String key, Integer pageIndex, Integer pageSize);
+
+    Integer countContestsByKey(String key);
+
     ArrayList<Contest> getUserContestsByKey(Integer authorId, String key, Boolean showPractice, Boolean showCompetition, Boolean orderByStartTimeAsc, Integer pageIndex, Integer pageSize);
 
     Integer countUserContestsByKey(Integer authorId, String key, Boolean showPractice, Boolean showCompetition);

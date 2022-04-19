@@ -193,6 +193,34 @@ public class ContestServiceImpl implements ContestService {
     }
 
     @Override
+    public ArrayList<Contest> getContestsByKey(String key, Integer pageIndex, Integer pageSize) {
+        key = key.trim();
+        ArrayList<Contest> contests = new ArrayList<>();
+        if (Pattern.matches("^\\d{1,8}$", key)) {
+            Contest contest = getContestById(Integer.valueOf(key));
+            if (contest != null && !contest.getName().contains(key)) {
+                contests.add(contest);
+            }
+        }
+        contests.addAll(contestRepository.getContestsByName(key, (pageIndex - 1) * pageSize, pageSize));
+        return contests;
+    }
+
+    @Override
+    public Integer countContestsByKey(String key) {
+        key = key.trim();
+        int total = 0;
+        if (Pattern.matches("^\\d{1,8}$", key)) {
+            Contest contest = getContestById(Integer.valueOf(key));
+            if (contest != null && !contest.getName().contains(key)) {
+                total++;
+            }
+        }
+        total += contestRepository.countContestsByName(key);
+        return total;
+    }
+
+    @Override
     public ArrayList<Contest> getUserContestsByKey(Integer authorId, String key, Boolean showPractice, Boolean showCompetition, Boolean orderByStartTimeAsc, Integer pageIndex, Integer pageSize) {
         key = key.trim();
         ArrayList<Contest> contests = new ArrayList<>();

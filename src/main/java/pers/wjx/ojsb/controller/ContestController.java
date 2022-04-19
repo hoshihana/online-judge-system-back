@@ -88,16 +88,30 @@ public class ContestController {
     }
 
     @SaCheckLogin
+    @GetMapping("")
+    public ArrayList<Contest> getContestByKey(@Length(max = 40, message = "搜索关键字长度要在0到40之间") String key,
+                                              @Min(value = 1, message = "页码不能小于1") Integer pageIndex,
+                                              @Min(value = 1, message = "页面大小不能小于1") Integer pageSize) {
+        return contestService.getContestsByKey(key, pageIndex, pageSize);
+    }
+
+    @SaCheckLogin
+    @GetMapping("/amount")
+    public Integer countContestsByKey(@Length(max = 40, message = "搜索关键字长度要在0到40之间") String key) {
+        return contestService.countContestsByKey(key);
+    }
+
+    @SaCheckLogin
     @GetMapping("/{id}/password")
     public String getContestPassword(@PathVariable Integer id) {
         Contest contest = contestService.getContestById(id);
         if (contest == null) {
             throw new NotFoundException("该比赛不存在");
         }
-        if(!contest.getPasswordSet()) {
+        if (!contest.getPasswordSet()) {
             throw new BadRequestException("该比赛未设置密码");
         }
-        if(contest.getAuthorId() != StpUtil.getLoginIdAsInt()) {
+        if (contest.getAuthorId() != StpUtil.getLoginIdAsInt()) {
             throw new ForbiddenException("无权查看该比赛密码");
         }
         return contest.getPassword();
@@ -121,9 +135,9 @@ public class ContestController {
     @SaCheckLogin
     @GetMapping("/users/{authorId}/amount")
     public Integer countUserContestsByKey(@PathVariable Integer authorId,
-                                                   @Length(max = 40, message = "搜索关键字长度要在0到40之间") String key,
-                                                   @NotNull(message = "类型筛选不能为空") Boolean showPractice,
-                                                   @NotNull(message = "类型筛选不能为空") Boolean showCompetition) {
+                                          @Length(max = 40, message = "搜索关键字长度要在0到40之间") String key,
+                                          @NotNull(message = "类型筛选不能为空") Boolean showPractice,
+                                          @NotNull(message = "类型筛选不能为空") Boolean showCompetition) {
         if (authorId != StpUtil.getLoginIdAsInt()) {
             throw new ForbiddenException("用户无权访问");
         }
@@ -145,7 +159,7 @@ public class ContestController {
             throw new ForbiddenException("无权编辑该比赛");
         }
         Date current = new Date();
-        if(!current.before(contest.getEndTime())) {
+        if (!current.before(contest.getEndTime())) {
             throw new BadRequestException("该比赛已结束，无法进行编辑");
         }
         if (passwordSet) {
@@ -168,7 +182,7 @@ public class ContestController {
     public String updateContestTime(@PathVariable Integer id,
                                     @NotNull(message = "开始时间不能为空") Date startTime,
                                     @NotNull(message = "结束时间不能为空") Date endTime) {
-        startTime.setTime(startTime.getTime() - startTime. getTime() % (60 * 1000));
+        startTime.setTime(startTime.getTime() - startTime.getTime() % (60 * 1000));
         endTime.setTime(endTime.getTime() - endTime.getTime() % (60 * 1000));
         Contest contest = contestService.getContestById(id);
         if (contest == null) {
@@ -285,10 +299,10 @@ public class ContestController {
             throw new ForbiddenException("比赛作者无法参加比赛");
         }
         Date current = new Date();
-        if(current.before(contest.getStartTime())) {
+        if (current.before(contest.getStartTime())) {
             throw new BadRequestException("比赛尚未开始");
         }
-        if(nickname != null && nickname.length() > 30) {
+        if (nickname != null && nickname.length() > 30) {
             throw new BadRequestException("参赛昵称长度不能超过30");
         }
         if (contestService.participateContest(id, StpUtil.getLoginIdAsInt(), nickname, password)) {
@@ -372,7 +386,7 @@ public class ContestController {
                 throw new ForbiddenException("该题仅作者可见");
             }
         }
-        return contestService.getContestTryPassAmountPair(id ,problemNumber);
+        return contestService.getContestTryPassAmountPair(id, problemNumber);
     }
 
     @SaCheckLogin
@@ -450,7 +464,7 @@ public class ContestController {
                 throw new ForbiddenException("该题仅作者可见");
             }
         }
-        return contestService.getContestProblemRecentRecords(id, problemNumber, StpUtil.getLoginIdAsInt(),limit);
+        return contestService.getContestProblemRecentRecords(id, problemNumber, StpUtil.getLoginIdAsInt(), limit);
     }
 
     @SaCheckLogin

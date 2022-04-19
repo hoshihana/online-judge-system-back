@@ -73,4 +73,16 @@
             #{type}
         </foreach>
     </select>
+    <select id="getContestsByName" resultType="pers.wjx.ojsb.pojo.Contest">
+        select *
+        from contest
+        where `name` like concat('%', #{name}, '%')
+        order by id desc
+        limit #{startIndex}, #{pageSize}
+    </select>
+    <select id="countContestsByName" resultType="java.lang.Integer">
+        select count(*)
+        from contest
+        where `name` like concat('%', #{name}, '%')
+    </select>
 </mapper>
