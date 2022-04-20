@@ -3,9 +3,9 @@
 <mapper namespace="pers.wjx.ojsb.repository.ContestRepository">
     <insert id="addContest" useGeneratedKeys="true" keyProperty="id">
         insert into contest(author_id, author_username, name, type, description, password_set, password, start_time,
-                            end_time, problem_amount)
+                            end_time)
         values (#{authorId}, #{authorUsername}, #{name}, #{type}, #{description}, #{passwordSet}, #{password},
-                #{startTime}, #{endTime}, #{problemAmount})
+                #{startTime}, #{endTime})
     </insert>
     <update id="updateContestDetail">
         update contest
