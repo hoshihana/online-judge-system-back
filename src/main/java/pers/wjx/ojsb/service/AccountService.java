@@ -1,5 +1,7 @@
 package pers.wjx.ojsb.service;
 
+import pers.wjx.ojsb.pojo.enumeration.Role;
+
 public interface AccountService {
     boolean existUsername(String username);
 
@@ -9,7 +11,7 @@ public interface AccountService {
 
     boolean userRegister(String username, String password, String email);
 
-    String getRoleById(Integer id);
+    Role getRoleById(Integer id);
 
     Integer authenticate(String username, String password);
 

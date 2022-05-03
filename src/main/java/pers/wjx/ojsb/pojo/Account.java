@@ -1,8 +1,10 @@
 package pers.wjx.ojsb.pojo;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import pers.wjx.ojsb.pojo.enumeration.Role;
 
 @Data
 @AllArgsConstructor
@@ -13,9 +15,10 @@ public class Account {
 
     private String username;
 
+    @JsonIgnore
     private String password;
 
     private String email;
 
-    private String role;
+    private Role role;
 }

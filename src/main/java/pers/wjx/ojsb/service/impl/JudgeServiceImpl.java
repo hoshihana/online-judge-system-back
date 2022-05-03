@@ -95,7 +95,7 @@ public class JudgeServiceImpl implements JudgeService {
     private ArrayList<String> currentOutTests;
 
     @Value("${code-location}")
-    private String codeLocation;
+    private String codeLocation ;
 
     @Value("${test-location}")
     private String testLocation;

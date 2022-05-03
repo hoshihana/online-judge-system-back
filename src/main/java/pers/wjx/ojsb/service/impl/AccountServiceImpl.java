@@ -4,6 +4,7 @@ import cn.dev33.satoken.secure.SaSecureUtil;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import pers.wjx.ojsb.pojo.Account;
+import pers.wjx.ojsb.pojo.enumeration.Role;
 import pers.wjx.ojsb.repository.AccountRepository;
 import pers.wjx.ojsb.service.AccountService;
 
@@ -39,12 +40,12 @@ public class AccountServiceImpl implements AccountService {
         userAccount.setUsername(username);
         userAccount.setPassword(SaSecureUtil.md5BySalt(password, passwordSalt));
         userAccount.setEmail(email);
-        userAccount.setRole("user");
+        userAccount.setRole(Role.USER);
         return accountRepository.addAccount(userAccount);
     }
 
     @Override
-    public String getRoleById(Integer id) {
+    public Role getRoleById(Integer id) {
         return accountRepository.getAccountById(id).getRole();
     }
 
