@@ -115,6 +115,10 @@ public class ProblemServiceImpl implements ProblemService {
 
     @Override
     public ProblemUserRelation getProblemUserRelation(Integer userId, Integer problemId) {
+        ProblemUserRelation problemUserRelation = problemUserRepository.getProblemUserRelation(userId, problemId);
+        if(problemUserRelation == null) {
+            problemUserRelation = new ProblemUserRelation(userId, problemId, 0, 0, false);
+        }
         return problemUserRepository.getProblemUserRelation(userId, problemId);
     }
 

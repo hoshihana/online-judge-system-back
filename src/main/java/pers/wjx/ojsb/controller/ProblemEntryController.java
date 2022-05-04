@@ -1,6 +1,7 @@
 package pers.wjx.ojsb.controller;
 
 import cn.dev33.satoken.annotation.SaCheckLogin;
+import cn.dev33.satoken.annotation.SaCheckRole;
 import cn.dev33.satoken.stp.StpUtil;
 import org.hibernate.validator.constraints.Length;
 import org.springframework.validation.annotation.Validated;
@@ -40,6 +41,7 @@ public class ProblemEntryController {
     }
 
     @SaCheckLogin
+    @SaCheckRole("ADMIN")
     @GetMapping("/user/{authorId}/all")
     public ArrayList<ProblemEntry> getAllUserProblemEntriesByKey(@PathVariable Integer authorId,
                                                               @Length(max = 40, message = "搜索关键字长度要在0到40之间") String key,
@@ -53,6 +55,7 @@ public class ProblemEntryController {
     }
 
     @SaCheckLogin
+    @SaCheckRole("ADMIN")
     @GetMapping("/user/{authorId}")
     public ArrayList<ProblemEntry> getUserProblemEntriesByKey(@PathVariable Integer authorId,
                                                               @Length(max = 40, message = "搜索关键字长度要在0到40之间") String key,
@@ -68,6 +71,7 @@ public class ProblemEntryController {
     }
 
     @SaCheckLogin
+    @SaCheckRole("ADMIN")
     @GetMapping("/user/{authorId}/amount")
     public Integer countUserProblemEntriesByKey(@PathVariable Integer authorId,
                                                 @Length(max = 40, message = "搜索关键字长度要在0到40之间") String key,

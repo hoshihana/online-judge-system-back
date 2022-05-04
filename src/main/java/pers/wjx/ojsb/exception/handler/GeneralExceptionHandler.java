@@ -1,6 +1,7 @@
 package pers.wjx.ojsb.exception.handler;
 
 import cn.dev33.satoken.exception.NotLoginException;
+import cn.dev33.satoken.exception.NotRoleException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -54,6 +55,10 @@ public class GeneralExceptionHandler {
     @ExceptionHandler(NotLoginException.class)
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     public String handleNotLoginException(NotLoginException ex) {
-        return "请先登录后操作";
+        return "未登录，无法访问该资源";
     }
+
+    @ExceptionHandler(NotRoleException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public String handleNotRoleExceptionException(NotRoleException ex) {return "权限不足，无法访问该资源";}
 }

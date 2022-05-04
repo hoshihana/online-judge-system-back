@@ -51,12 +51,12 @@ public class AccountServiceImpl implements AccountService {
 
     // 认证成功返回账户id，否则返回null
     @Override
-    public Integer authenticate(String username, String password) {
+    public Account authenticate(String username, String password) {
         Account account = accountRepository.getAccountByUsername(username);
         if(account == null || account.getPassword().compareTo(SaSecureUtil.md5BySalt(password, passwordSalt)) != 0) {
             return null;
         } else {
-            return account.getId();
+            return account;
         }
     }
 

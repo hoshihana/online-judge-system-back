@@ -1,6 +1,7 @@
 package pers.wjx.ojsb.controller;
 
 import cn.dev33.satoken.annotation.SaCheckLogin;
+import cn.dev33.satoken.annotation.SaCheckRole;
 import cn.dev33.satoken.stp.StpUtil;
 import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.Range;
@@ -35,6 +36,7 @@ public class ProblemController {
     private ProblemService problemService;
 
     @SaCheckLogin
+    @SaCheckRole("ADMIN")
     @PostMapping("")    // 创建成功返回题目id
     public Integer addProblem(@Length(min = 1, max = 40, message = "题目名长度要在1到40之间") String name,
                               String description, String inputFormat, String outputFormat, String explanation, String samples,
@@ -50,6 +52,7 @@ public class ProblemController {
     }
 
     @SaCheckLogin
+    @SaCheckRole("ADMIN")
     @PatchMapping("/{id}")
     public String updateProblem(@PathVariable Integer id, @Length(min = 1, max = 40, message = "题目名长度要在1到40之间") String name,
                                  String description, String inputFormat, String outputFormat, String explanation, String samples,
@@ -71,32 +74,46 @@ public class ProblemController {
     }
 
     @SaCheckLogin
+    @GetMapping("/{id}/permissions/edit")
+    public String checkEditProblem(@PathVariable Integer id) {
+        Problem problem = problemService.getProblemById(id);
+        if (problem == null) {
+            throw new NotFoundException("题目不存在");
+        }
+        if(problem.getAuthorId() != StpUtil.getLoginIdAsInt()){
+            throw new ForbiddenException("无权编辑该题目");
+        }
+        return "允许编辑该题目";
+    }
+
+    @SaCheckLogin
     @GetMapping("/{id}")
     public Problem getProblemById(@PathVariable Integer id) {
         Problem problem = problemService.getProblemById(id);
         if (problem == null) {
             throw new NotFoundException("题目不存在");
         }
-        if(problem.getVisibility() != Visibility.PUBLIC && problem.getAuthorId() != StpUtil.getLoginIdAsInt()){
+        if(problem.getVisibility() != Visibility.PUBLIC && !StpUtil.hasRole("ADMIN")){
             throw new ForbiddenException("无权查看该题目");
         }
         return problem;
     }
 
     @SaCheckLogin
-    @PostMapping("/{id}/check")
-    public String checkProblem(@PathVariable Integer id) {
+    @GetMapping("/{id}/permissions/get")
+    public String checkGetProblem(@PathVariable Integer id) {
         Problem problem = problemService.getProblemById(id);
         if (problem == null) {
             throw new NotFoundException("题目不存在");
         }
-        if(problem.getVisibility() != Visibility.PUBLIC && problem.getAuthorId() != StpUtil.getLoginIdAsInt()){
+        if(problem.getVisibility() != Visibility.PUBLIC && !StpUtil.hasRole("ADMIN")){
             throw new ForbiddenException("无权查看该题目");
         }
         return "允许查看该题目";
     }
 
     @SaCheckLogin
+    @SaCheckRole("ADMIN")
     @DeleteMapping("/{id}")
     public Integer deleteProblemById(@PathVariable Integer id) {
         Integer authorId = problemService.getAuthorIdById(id);
@@ -130,8 +147,8 @@ public class ProblemController {
         if (problem == null) {
             throw new NotFoundException("题目不存在");
         }
-        if(problem.getVisibility() != Visibility.PUBLIC && problem.getAuthorId() != StpUtil.getLoginIdAsInt()){
-            throw new ForbiddenException("无权查看该题目提交/通过人数");
+        if(problem.getVisibility() != Visibility.PUBLIC && !StpUtil.hasRole("ADMIN")){
+            throw new ForbiddenException("无权查看该题解答情况");
         }
         return problemService.getTryPassAmountPairById(id);
     }
@@ -143,13 +160,14 @@ public class ProblemController {
         if (problem == null) {
             throw new NotFoundException("题目不存在");
         }
-        if(problem.getVisibility() != Visibility.PUBLIC && problem.getAuthorId() != StpUtil.getLoginIdAsInt()){
-            throw new ForbiddenException("无权查看该题目各用户的提交/通过次数");
+        if(problem.getVisibility() != Visibility.PUBLIC && !StpUtil.hasRole("ADMIN")){
+            throw new ForbiddenException("无权查看该用户在该题的解答情况");
         }
-        return problemService.getProblemUserRelation(userId, problemId);    // todo 可能不存在表项，返回null
+        return problemService.getProblemUserRelation(userId, problemId);
     }
 
     @SaCheckLogin
+    @SaCheckRole("ADMIN")
     @PostMapping("/{id}/test")
     public TestFileInfo addProblemTestFile(@PathVariable Integer id, @NotNull(message = "上传测试点文件不能为空") MultipartFile file) {
         Integer authorId = problemService.getAuthorIdById(id);
@@ -177,6 +195,7 @@ public class ProblemController {
     }
 
     @SaCheckLogin
+    @SaCheckRole("ADMIN")
     @GetMapping("/{id}/test")
     public ResponseEntity<FileSystemResource> getProblemTest(@PathVariable Integer id) {
         Integer authorId = problemService.getAuthorIdById(id);
@@ -198,6 +217,7 @@ public class ProblemController {
     }
 
     @SaCheckLogin
+    @SaCheckRole("ADMIN")
     @GetMapping("/{id}/testInfo")
     public TestFileInfo getProblemTestInfo(@PathVariable Integer id) {
         Integer authorId = problemService.getAuthorIdById(id);

@@ -47,7 +47,7 @@ public class RecordController {
         if (problem == null) {
             throw new BadRequestException("提交题号不存在");
         }
-        if(problem.getVisibility() != Visibility.PUBLIC && problem.getAuthorId() != StpUtil.getLoginIdAsInt()) {
+        if(problem.getVisibility() != Visibility.PUBLIC && !StpUtil.hasRole("ADMIN")) {
             throw new BadRequestException("无权提交代码");
         }
         if(!problem.getTestSet()) {
@@ -94,10 +94,26 @@ public class RecordController {
         if(record.getContestId() != null) {
             throw new ForbiddenException("比赛中提交记录无法直接查看");
         }
-        if(record.getPersonal() && StpUtil.getLoginIdAsInt() != record.getUserId()) {   // todo 管理员可查看该记录
-            throw new ForbiddenException("该题目为私密或赛题，仅提交者和管理员可以查看该记录");
+        if(record.getPersonal() && !StpUtil.hasRole("ADMIN")) {
+            throw new ForbiddenException("该记录仅个人可见，仅提交者和管理员可以查看该记录");
         }
         return record;
+    }
+
+    @SaCheckLogin
+    @GetMapping("/{id}/permissions/get")
+    public String checkGetRecord(@PathVariable Integer id) {
+        Record record = recordService.getRecord(id);
+        if(record == null) {
+            throw new NotFoundException("该记录不存在");
+        }
+        if(record.getContestId() != null) {
+            throw new ForbiddenException("比赛中提交记录无法直接查看");
+        }
+        if(record.getPersonal() && !StpUtil.hasRole("ADMIN")) {
+            throw new ForbiddenException("该记录仅个人可见，仅提交者和管理员可以查看该记录");
+        }
+        return "允许查看该记录";
     }
 
     @SaCheckLogin
@@ -110,8 +126,8 @@ public class RecordController {
         if(record.getContestId() != null) {
             throw new ForbiddenException("比赛中提交的代码无法直接查看");
         }
-        if(record.getPersonal() && StpUtil.getLoginIdAsInt() != record.getUserId()) {   // todo 管理员可查看该提交代码
-            throw new ForbiddenException("该题目为私密或赛题，仅提交者和管理员可以查看该提交代码");
+        if(record.getPersonal() && !StpUtil.hasRole("ADMIN")) {
+            throw new ForbiddenException("该记录仅个人可见，仅提交者和管理员可以查看该提交代码");
         }
         return recordService.getCode(id, submitLanguage, codeLength);
     }
@@ -126,8 +142,8 @@ public class RecordController {
         if(record.getContestId() != null) {
             throw new ForbiddenException("比赛中的编译信息无法直接查看");
         }
-        if(record.getPersonal() && StpUtil.getLoginIdAsInt() != record.getUserId()) {   // todo 管理员可查看该编译信息
-            throw new ForbiddenException("该题目为私密或赛题，仅提交者和管理员可以查看该编译信息");
+        if(record.getPersonal() && !StpUtil.hasRole("ADMIN")) {
+            throw new ForbiddenException("该记录仅个人可见，仅提交者和管理员可以查看该编译信息");
         }
         if(record.getCompileOutput() == null) {
             throw new NotFoundException("无编译信息");
@@ -143,8 +159,8 @@ public class RecordController {
         if(problem == null) {
             throw new NotFoundException("该题目不存在");
         }
-        if(problem.getVisibility() != Visibility.PUBLIC && problem.getAuthorId() != StpUtil.getLoginIdAsInt()) {
-            throw new BadRequestException("无权查看该题我的最近提交");
+        if(problem.getVisibility() != Visibility.PUBLIC && !StpUtil.hasRole("ADMIN")) {
+            throw new BadRequestException("该题目仅管理员可见，无权查看该题我的最近提交");
         }
         return recordService.getRecentRecords(problemId, StpUtil.getLoginIdAsInt(), limit);
     }

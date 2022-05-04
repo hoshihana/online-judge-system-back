@@ -1,5 +1,6 @@
 package pers.wjx.ojsb.controller;
 
+import cn.dev33.satoken.annotation.SaCheckLogin;
 import cn.dev33.satoken.stp.StpUtil;
 import org.hibernate.validator.constraints.Length;
 import org.springframework.validation.annotation.Validated;
@@ -7,7 +8,9 @@ import org.springframework.web.bind.annotation.*;
 import pers.wjx.ojsb.exception.BadRequestException;
 import pers.wjx.ojsb.exception.UnauthorizedException;
 import pers.wjx.ojsb.exception.InternalServerErrorException;
+import pers.wjx.ojsb.pojo.Account;
 import pers.wjx.ojsb.pojo.LoginStatus;
+import pers.wjx.ojsb.pojo.enumeration.Role;
 import pers.wjx.ojsb.service.AccountService;
 
 import javax.annotation.Resource;
@@ -46,14 +49,15 @@ public class AccountController {
     }
 
     @PostMapping("/login")
-    public Integer login(@NotBlank(message = "用户名不能为空") String username, @NotBlank(message = "密码不能为空") String password) {
-        Integer accountId = accountService.authenticate(username, password);
-        if (accountId == null) {
+    public LoginStatus login(@NotBlank(message = "用户名不能为空") String username, @NotBlank(message = "密码不能为空") String password) {
+        Account account = accountService.authenticate(username, password);
+        if (account == null) {
             throw new UnauthorizedException("用户名或密码错误");
         } else {
-            StpUtil.login(accountId);
-            StpUtil.getSession(true).setAttribute("username", username);
-            return accountId;
+            StpUtil.login(account.getId());
+            StpUtil.getSession(true).setAttribute("username", account.getUsername());
+            StpUtil.getSession(true).setAttribute("role", account.getRole());
+            return new LoginStatus(true, account.getId(), account.getUsername(), account.getRole());
         }
     }
 
@@ -66,6 +70,7 @@ public class AccountController {
             loginStatus.setLogin(true);
             loginStatus.setUserid(StpUtil.getLoginIdAsInt());
             loginStatus.setUsername((String) StpUtil.getSession().getAttribute("username"));
+            loginStatus.setRole((Role) StpUtil.getSession().getAttribute("role"));
         }
         return loginStatus;
     }
@@ -74,10 +79,5 @@ public class AccountController {
     public String logout() {
         StpUtil.logout();
         return "登出成功";
-    }
-
-    @GetMapping("/username")
-    public String getUsernameById(Integer id) {
-        return accountService.getUsernameById(id);
     }
 }

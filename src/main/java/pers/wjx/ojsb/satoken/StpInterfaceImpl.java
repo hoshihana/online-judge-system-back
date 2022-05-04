@@ -22,7 +22,7 @@ public class StpInterfaceImpl implements StpInterface {
     @Override
     public List<String> getRoleList(Object loginId, String loginType) {
         List<String> roleList = new ArrayList<>();
-        roleList.add(accountService.getRoleById((Integer) loginId).name());
+        roleList.add(accountService.getRoleById(Integer.parseInt((String) loginId)).name());
         return roleList;
     }
 }
