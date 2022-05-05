@@ -12,6 +12,8 @@ public interface ProblemService {
 
     Integer countProblemEntriesByKey(String key);
 
+    ArrayList<ProblemEntry> getRandomPublicProblemEntries(Integer limit);
+
     ArrayList<ProblemEntry> getUserProblemEntriesByKey(Integer authorId, String key, Boolean showPrivate, Boolean showHidden, Boolean showPublic, Integer pageIndex, Integer pageSize);
 
     Integer countUserProblemEntriesByKey(Integer authorId, String key, Boolean showPrivate, Boolean showHidden, Boolean showPublic);

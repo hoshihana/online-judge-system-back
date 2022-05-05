@@ -2,6 +2,7 @@ package pers.wjx.ojsb.service;
 
 import org.springframework.stereotype.Service;
 import pers.wjx.ojsb.pojo.Record;
+import pers.wjx.ojsb.pojo.SubmitAcceptAmountPair;
 import pers.wjx.ojsb.pojo.enumeration.JudgeResult;
 import pers.wjx.ojsb.pojo.enumeration.Language;
 
@@ -23,4 +24,6 @@ public interface RecordService {
     String getCode(Integer id, Language submitLanguage, Integer codeLength);
 
     ArrayList<Record> getRecentRecords(Integer problemId, Integer userId, Integer limit);
+
+    ArrayList<SubmitAcceptAmountPair> getAllRecentSubmitAcceptAmount(Integer dayLimit);
 }

@@ -19,6 +19,7 @@ import pers.wjx.ojsb.service.RecordService;
 import javax.annotation.Resource;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -190,6 +191,19 @@ public class ContestServiceImpl implements ContestService {
     @Override
     public Contest getContestById(Integer id) {
         return contestRepository.getContestById(id);
+    }
+
+    @Override
+    public ArrayList<Contest> getRecentContests(Integer dayLimit) {
+        ArrayList<Contest> contests = new ArrayList<>();
+        Date current = new Date();
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMdd");
+        contests.addAll(contestRepository.getOngoingContests());
+        for(int i = 0; i < dayLimit; i++) {
+            contests.addAll(contestRepository.getComingContestsByDay(simpleDateFormat.format(current)));
+            current.setTime(current.getTime() + 24 * 60 * 60 * 1000);
+        }
+        return contests;
     }
 
     @Override

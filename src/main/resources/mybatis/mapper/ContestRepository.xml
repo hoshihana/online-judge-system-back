@@ -85,4 +85,18 @@
         from contest
         where `name` like concat('%', #{name}, '%')
     </select>
+    <select id="getOngoingContests" resultType="pers.wjx.ojsb.pojo.Contest">
+        select *
+        from contest
+        where current_timestamp >= start_time
+            and current_timestamp &lt; end_time
+        order by end_time asc
+    </select>
+    <select id="getComingContestsByDay" resultType="pers.wjx.ojsb.pojo.Contest">
+        select *
+        from contest
+        where date_format(start_time, '%Y%m%d') like #{dayString}
+            and current_timestamp &lt; start_time
+        order by start_time asc
+    </select>
 </mapper>

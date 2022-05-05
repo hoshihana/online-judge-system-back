@@ -3,6 +3,7 @@ package pers.wjx.ojsb.repository;
 import org.apache.ibatis.annotations.Mapper;
 import org.springframework.stereotype.Repository;
 import pers.wjx.ojsb.pojo.Record;
+import pers.wjx.ojsb.pojo.TryPassAmountPair;
 import pers.wjx.ojsb.pojo.enumeration.JudgeResult;
 import pers.wjx.ojsb.pojo.enumeration.Language;
 
@@ -45,4 +46,8 @@ public interface RecordRepository {
     boolean setCompileOutput(Integer id, String compileOutput);
 
     Integer deleteRecordsByContestId(Integer contestId);
+
+    Integer countRecordsByDay(String dayString);
+
+    Integer countAcceptedRecordsByDay(String dayString);
 }

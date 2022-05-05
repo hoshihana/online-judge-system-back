@@ -23,6 +23,10 @@ public interface ContestRepository {
 
     Contest getContestById(Integer id);
 
+    ArrayList<Contest> getOngoingContests();
+
+    ArrayList<Contest> getComingContestsByDay(String dayString);
+
     ArrayList<Contest> getContestsByName(String name, Integer startIndex, Integer pageSize);
 
     Integer countContestsByName(String name);

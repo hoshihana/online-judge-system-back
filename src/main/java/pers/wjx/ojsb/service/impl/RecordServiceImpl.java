@@ -6,6 +6,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
 import pers.wjx.ojsb.exception.InternalServerErrorException;
 import pers.wjx.ojsb.pojo.Record;
+import pers.wjx.ojsb.pojo.SubmitAcceptAmountPair;
+import pers.wjx.ojsb.pojo.TryPassAmountPair;
 import pers.wjx.ojsb.pojo.enumeration.JudgeResult;
 import pers.wjx.ojsb.pojo.enumeration.Language;
 import pers.wjx.ojsb.repository.AccountRepository;
@@ -20,7 +22,9 @@ import javax.annotation.Resource;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.nio.charset.StandardCharsets;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.regex.Pattern;
 
@@ -127,6 +131,19 @@ public class RecordServiceImpl implements RecordService {
     @Override
     public ArrayList<Record> getRecentRecords(Integer problemId, Integer userId, Integer limit) {
         return recordRepository.getRecentRecords(problemId, userId, limit);
+    }
+
+    @Override
+    public ArrayList<SubmitAcceptAmountPair> getAllRecentSubmitAcceptAmount(Integer dayLimit) {
+        ArrayList<SubmitAcceptAmountPair> submitAcceptAmountPairs = new ArrayList<>();
+        Date current = new Date();
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMdd");
+        for(int i = 0; i < dayLimit; i++) {
+            submitAcceptAmountPairs.add(new SubmitAcceptAmountPair(recordRepository.countRecordsByDay(simpleDateFormat.format(current)),
+                    recordRepository.countAcceptedRecordsByDay(simpleDateFormat.format(current))));
+            current.setTime(current.getTime() - 24 * 60 * 60 * 1000);
+        }
+        return submitAcceptAmountPairs;
     }
 
     private String getCodeFileSuffix(Language language) {

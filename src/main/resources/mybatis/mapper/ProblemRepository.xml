@@ -109,5 +109,15 @@
         </foreach>
         order by id desc
     </select>
+    <select id="getRandomPublicProblemEntries" resultType="pers.wjx.ojsb.pojo.ProblemEntry">
+        select id, name, visibility, test_set, submit, accept
+        from (
+                 select @rownum:=@rownum+1 as rownum, id, name, visibility, test_set, submit, accept
+                 from problem, (SELECT @rownum := 0) r
+                 where visibility = 'PUBLIC'
+             ) as prolbem
+        where rownum >= ceil((rand() * (select count(*) from problem)))
+            limit #{limit}
+    </select>
 
 </mapper>

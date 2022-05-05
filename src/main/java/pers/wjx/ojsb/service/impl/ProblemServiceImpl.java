@@ -17,6 +17,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
@@ -66,6 +67,17 @@ public class ProblemServiceImpl implements ProblemService {
         }
         total += problemRepository.countPublicProblemEntriesByName(key);
         return total;
+    }
+
+    @Override
+    public ArrayList<ProblemEntry> getRandomPublicProblemEntries(Integer limit) {
+        if(problemRepository.countPublicProblemEntriesByName("") < 500) {
+            ArrayList<ProblemEntry> problemEntries = problemRepository.getPublicProblemEntriesByName("", 0, 500);
+            Collections.shuffle(problemEntries);
+            return new ArrayList<>(problemEntries.subList(0, Math.min(problemEntries.size(), limit)));
+        } else {
+            return problemRepository.getRandomPublicProblemEntries(limit);
+        }
     }
 
     @Override

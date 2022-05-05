@@ -4,6 +4,7 @@ import cn.dev33.satoken.annotation.SaCheckLogin;
 import cn.dev33.satoken.annotation.SaCheckRole;
 import cn.dev33.satoken.stp.StpUtil;
 import org.hibernate.validator.constraints.Length;
+import org.hibernate.validator.constraints.Range;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -38,6 +39,11 @@ public class ProblemEntryController {
     @GetMapping("/public/amount")
     public Integer countPublicProblemEntriesByKey(@Length(max = 40, message = "搜索关键字长度要在0到40之间") String key) {
         return problemService.countProblemEntriesByKey(key == null ? "" : key);
+    }
+
+    @GetMapping("/public/random")
+    public ArrayList<ProblemEntry> getRandomPublicProblemEntries(@Range(min = 1, max = 20, message = "数量限制需在1到20之间") Integer limit) {
+        return problemService.getRandomPublicProblemEntries(limit);
     }
 
     @SaCheckLogin

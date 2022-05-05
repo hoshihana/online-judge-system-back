@@ -24,6 +24,8 @@ public interface ProblemRepository {
 
     Integer countPublicProblemEntriesByName(String name);
 
+    ArrayList<ProblemEntry> getRandomPublicProblemEntries(Integer limit);
+
     ArrayList<ProblemEntry> getUserProblemEntriesByName(Integer authorId, String name, ArrayList<Visibility> visibilities, Integer startIndex, Integer pageSize);
 
     ArrayList<ProblemEntry> getAllUserProblemEntriesByName(Integer authorId, String name, ArrayList<Visibility> visibilities);

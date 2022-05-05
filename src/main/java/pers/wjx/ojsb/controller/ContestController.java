@@ -4,6 +4,7 @@ import cn.dev33.satoken.annotation.SaCheckLogin;
 import cn.dev33.satoken.annotation.SaCheckRole;
 import cn.dev33.satoken.stp.StpUtil;
 import org.hibernate.validator.constraints.Length;
+import org.hibernate.validator.constraints.Range;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -87,6 +88,11 @@ public class ContestController {
             throw new NotFoundException("该比赛不存在");
         }
         return contest;
+    }
+
+    @GetMapping("/recent")
+    public ArrayList<Contest> getRecentContests(@Range(min = 1, max = 7, message = "查询天数需在1到7天之间")Integer dayLimit) {
+        return contestService.getRecentContests(dayLimit);
     }
 
     @SaCheckLogin

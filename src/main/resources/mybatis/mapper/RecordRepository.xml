@@ -2,8 +2,10 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="pers.wjx.ojsb.repository.RecordRepository">
     <insert id="addRecord" useGeneratedKeys="true" keyProperty="id">
-        insert into record(user_id, username, problem_id, contest_id, problem_number, submit_time, code_length, submit_language, personal)
-        values (#{userId}, #{username}, #{problemId}, #{contestId}, #{problemNumber}, #{submitTime}, #{codeLength}, #{submitLanguage}, #{personal})
+        insert into record(user_id, username, problem_id, contest_id, problem_number, submit_time, code_length,
+                           submit_language, personal)
+        values (#{userId}, #{username}, #{problemId}, #{contestId}, #{problemNumber}, #{submitTime}, #{codeLength},
+                #{submitLanguage}, #{personal})
     </insert>
     <update id="setJudgeResult">
         update record
@@ -28,13 +30,13 @@
         update record
         set compile_output = #{compileOutput}
         where id = #{id}
-            and compile_output is null
+          and compile_output is null
     </update>
     <update id="setRecordsPersonalByProblemId">
         update record
         set personal = #{personal}
         where problem_id = #{problemId}
-            and contest_id is null
+          and contest_id is null
     </update>
     <update id="setContestRecordsPersonalByProblemId">
         update record
@@ -43,14 +45,15 @@
           and contest_id is not null
     </update>
     <delete id="deleteRecordsByContestId">
-        delete from record
+        delete
+        from record
         where contest_id = #{contestId}
     </delete>
     <select id="getRecords" resultType="pers.wjx.ojsb.pojo.Record">
         select *
         from record
         where username like concat('%', #{username}, '%')
-            and contest_id is null
+        and contest_id is null
         <if test="problemId != null">
             and problem_id = #{problemId}
         </if>
@@ -87,7 +90,7 @@
         select count(*)
         from record
         where username like concat('%', #{username}, '%')
-            and contest_id is null
+        and contest_id is null
         <if test="problemId != null">
             and problem_id = #{problemId}
         </if>
@@ -122,7 +125,7 @@
         select *
         from record
         where username like concat('%', #{username}, '%')
-            and contest_id = #{contestId}
+        and contest_id = #{contestId}
         <if test="problemNumber != null">
             and problem_Number = #{problemNumber}
         </if>
@@ -159,7 +162,7 @@
         select count(*)
         from record
         where username like concat('%', #{username}, '%')
-            and contest_id = #{contestId}
+        and contest_id = #{contestId}
         <if test="problemNumber != null">
             and problem_number = #{problemNumber}
         </if>
@@ -174,15 +177,26 @@
         select *
         from record
         where id = #{recordId}
-            and contest_id = #{contestId}
+          and contest_id = #{contestId}
     </select>
     <select id="getContestRecentRecords" resultType="pers.wjx.ojsb.pojo.Record">
         select *
         from record
         where contest_id = #{contestId}
-            and problem_number = #{problemNumber}
-            and user_id = #{userId}
+          and problem_number = #{problemNumber}
+          and user_id = #{userId}
         order by id desc
             limit #{limit}
+    </select>
+    <select id="countRecordsByDay" resultType="java.lang.Integer">
+        select count(*)
+        from record
+        where date_format(submit_time, '%Y%m%d') like #{dayString}
+    </select>
+    <select id="countAcceptedRecordsByDay" resultType="java.lang.Integer">
+        select count(*)
+        from record
+        where judge_result = 'AC'
+          and date_format(submit_time, '%Y%m%d') like #{dayString}
     </select>
 </mapper>

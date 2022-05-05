@@ -39,6 +39,8 @@ public interface ContestService {
 
     Contest getContestById(Integer id);
 
+    ArrayList<Contest> getRecentContests(Integer dayLimit);
+
     ArrayList<Contest> getContestsByKey(String key, Integer pageIndex, Integer pageSize);
 
     Integer countContestsByKey(String key);
