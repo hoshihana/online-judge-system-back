@@ -48,7 +48,7 @@ public class ProblemEntryController {
 
     @SaCheckLogin
     @SaCheckRole("ADMIN")
-    @GetMapping("/user/{authorId}/all")
+    @GetMapping("/users/{authorId}/all")
     public ArrayList<ProblemEntry> getAllUserProblemEntriesByKey(@PathVariable Integer authorId,
                                                               @Length(max = 40, message = "搜索关键字长度要在0到40之间") String key,
                                                               @NotNull(message = "状态筛选不能为空") Boolean showPrivate,
@@ -62,7 +62,7 @@ public class ProblemEntryController {
 
     @SaCheckLogin
     @SaCheckRole("ADMIN")
-    @GetMapping("/user/{authorId}")
+    @GetMapping("/users/{authorId}")
     public ArrayList<ProblemEntry> getUserProblemEntriesByKey(@PathVariable Integer authorId,
                                                               @Length(max = 40, message = "搜索关键字长度要在0到40之间") String key,
                                                               @NotNull(message = "状态筛选不能为空") Boolean showPrivate,
@@ -78,7 +78,7 @@ public class ProblemEntryController {
 
     @SaCheckLogin
     @SaCheckRole("ADMIN")
-    @GetMapping("/user/{authorId}/amount")
+    @GetMapping("/users/{authorId}/amount")
     public Integer countUserProblemEntriesByKey(@PathVariable Integer authorId,
                                                 @Length(max = 40, message = "搜索关键字长度要在0到40之间") String key,
                                                 @NotNull(message = "状态筛选不能为空") Boolean showPrivate,

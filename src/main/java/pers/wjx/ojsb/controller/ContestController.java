@@ -451,6 +451,9 @@ public class ContestController {
                 throw new ForbiddenException("比赛尚未开始，无法查看该参赛用户解答情况");
             }
         }
+        if(!contestService.isContestParticipant(id, userId)) {
+            throw new BadRequestException("该用户未参加比赛，无法查看其解答情况");
+        }
         return contestService.getContestProblemUserRelations(id, userId);
     }
 
