@@ -103,12 +103,12 @@ public class ContestController {
             throw new NotFoundException("该比赛不存在");
         }
         if (!StpUtil.hasRole("ADMIN")) {
-            if (!contestService.isContestParticipant(id, StpUtil.getLoginIdAsInt())) {
-                throw new ForbiddenException("未参加比赛，无权进入该比赛");
-            }
             Date current = new Date();
             if (current.before(contest.getStartTime())) {
                 throw new ForbiddenException("比赛尚未开始，无法进入该比赛");
+            }
+            if (!contestService.isContestParticipant(id, StpUtil.getLoginIdAsInt())) {
+                throw new ForbiddenException("未参加比赛，无权进入该比赛");
             }
         }
         return "允许进入比赛";
