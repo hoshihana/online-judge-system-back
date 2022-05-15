@@ -6,6 +6,7 @@ import org.hibernate.validator.constraints.Length;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import pers.wjx.ojsb.exception.BadRequestException;
+import pers.wjx.ojsb.exception.NotFoundException;
 import pers.wjx.ojsb.exception.UnauthorizedException;
 import pers.wjx.ojsb.exception.InternalServerErrorException;
 import pers.wjx.ojsb.pojo.Account;
@@ -79,5 +80,48 @@ public class AccountController {
     public String logout() {
         StpUtil.logout();
         return "登出成功";
+    }
+
+    @SaCheckLogin
+    @PatchMapping("/avatar")
+    public String updateAvatar(@Length(min = 1, max = 40, message = "头像生成信息长度要在1到40之间") String avatar) {
+        if(accountService.updateAvatar(StpUtil.getLoginIdAsInt(), avatar)) {
+            return "头像修改成功";
+        } else {
+            throw new InternalServerErrorException("头像修改失败");
+        }
+    }
+
+    @SaCheckLogin
+    @PatchMapping("/school")
+    public String updateSchool(@Length(min = 0, max = 40, message = "学校名称长度不能超过40") String school) {
+        if(accountService.updateSchool(StpUtil.getLoginIdAsInt(), school)) {
+            return "学校修改成功";
+        } else {
+            throw new InternalServerErrorException("学校修改失败");
+        }
+    }
+
+    @SaCheckLogin
+    @PatchMapping("/profile")
+    public String updateProfile(String profile) {
+        if (accountService.updateProfile(StpUtil.getLoginIdAsInt(), profile)) {
+            return "个人简介修改成功";
+        } else {
+            throw new InternalServerErrorException("个人简介修改失败");
+        }
+    }
+
+    @SaCheckLogin
+    @GetMapping("/{id}")
+    public Account getAccount(@PathVariable Integer id) {
+        Account account = accountService.getAccountById(id);
+        if(account == null) {
+            throw new NotFoundException("账号不存在");
+        }
+        if(StpUtil.getLoginIdAsInt() != id) {
+            account.setEmail(null);
+        }
+        return account;
     }
 }

@@ -19,4 +19,10 @@ public interface AccountRepository {
     String getUsernameById(Integer id);
 
     Integer countAccountsById(Integer id);
+
+    boolean setAvatar(Integer id, String avatar);
+
+    boolean setSchool(Integer id, String school);
+
+    boolean setProfile(Integer id, String profile);
 }

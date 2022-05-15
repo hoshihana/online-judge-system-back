@@ -41,6 +41,7 @@ public class AccountServiceImpl implements AccountService {
         userAccount.setPassword(SaSecureUtil.md5BySalt(password, passwordSalt));
         userAccount.setEmail(email);
         userAccount.setRole(Role.USER);
+        userAccount.setAvatar(username);
         return accountRepository.addAccount(userAccount);
     }
 
@@ -63,5 +64,25 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public String getUsernameById(Integer id) {
         return accountRepository.getUsernameById(id);
+    }
+
+    @Override
+    public boolean updateAvatar(Integer id, String avatar) {
+        return accountRepository.setAvatar(id, avatar);
+    }
+
+    @Override
+    public boolean updateSchool(Integer id, String school) {
+        return accountRepository.setSchool(id, school);
+    }
+
+    @Override
+    public boolean updateProfile(Integer id, String profile) {
+        return accountRepository.setProfile(id, profile);
+    }
+
+    @Override
+    public Account getAccountById(Integer id) {
+        return accountRepository.getAccountById(id);
     }
 }

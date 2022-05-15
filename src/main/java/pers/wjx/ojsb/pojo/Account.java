@@ -21,4 +21,10 @@ public class Account {
     private String email;
 
     private Role role;
+
+    private String avatar;
+
+    private String school;
+
+    private String profile;
 }

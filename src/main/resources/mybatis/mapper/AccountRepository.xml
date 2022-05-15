@@ -2,10 +2,24 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="pers.wjx.ojsb.repository.AccountRepository">
     <insert id="addAccount" useGeneratedKeys="true" keyProperty="id">
-        insert into account(username, password, email, role)
-        values (#{username}, #{password}, #{email}, #{role});
+        insert into account(username, password, email, role, avatar)
+        values (#{username}, #{password}, #{email}, #{role}, #{avatar});
     </insert>
-
+    <update id="setAvatar">
+        update account
+        set avatar = #{avatar}
+        where id = #{id}
+    </update>
+    <update id="setSchool">
+        update account
+        set school = #{school}
+        where id = #{id}
+    </update>
+    <update id="setProfile">
+        update account
+        set profile = #{profile}
+        where id = #{id}
+    </update>
     <select id="getAccountByUsername" resultType="pers.wjx.ojsb.pojo.Account">
         select *
         from account
