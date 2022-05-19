@@ -3,6 +3,8 @@ package pers.wjx.ojsb.repository;
 import org.apache.ibatis.annotations.Mapper;
 import org.springframework.stereotype.Repository;
 import pers.wjx.ojsb.pojo.ContestProblemUserRelation;
+import pers.wjx.ojsb.pojo.ContestRankUnit;
+import pers.wjx.ojsb.pojo.ContestRankEntry;
 
 import java.util.ArrayList;
 
@@ -24,4 +26,14 @@ public interface ContestProblemUserRepository {
     boolean increaseContestSubmit(Integer contestId, Integer problemNumber, Integer userId);
 
     boolean increaseContestAccept(Integer contestId, Integer problemNumber, Integer userId);
+
+    boolean increaseContestAttempt(Integer contestId, Integer problemNumber, Integer userId);
+
+    boolean setContestTimeCost(Integer contestId, Integer problemNumber, Integer userId, Long timeCost);
+
+    ArrayList<ContestRankEntry> getContestRankEntries(Integer contestId, Integer startIndex, Integer pageSize);
+
+    ArrayList<ContestRankEntry> getAllContestRankEntries(Integer contestId);
+
+    ArrayList<ContestRankUnit> getContestRankUnits(Integer contestId, Integer userId);
 }

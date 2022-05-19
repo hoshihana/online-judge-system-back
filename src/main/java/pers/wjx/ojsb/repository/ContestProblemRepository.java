@@ -2,6 +2,7 @@ package pers.wjx.ojsb.repository;
 
 import org.apache.ibatis.annotations.Mapper;
 import org.springframework.stereotype.Repository;
+import pers.wjx.ojsb.pojo.ContestRankHeaderUnit;
 import pers.wjx.ojsb.pojo.Problem;
 import pers.wjx.ojsb.pojo.ProblemEntry;
 
@@ -23,4 +24,8 @@ public interface ContestProblemRepository {
     boolean increaseContestSubmit(Integer contestId, Integer problemNumber);
 
     boolean increaseContestAccept(Integer contestId, Integer problemNumber);
+
+    boolean setContestFirst(Integer contestId, Integer problemNumber, Integer userId);
+
+    ArrayList<ContestRankHeaderUnit> getContestProblems(Integer contestId);
 }

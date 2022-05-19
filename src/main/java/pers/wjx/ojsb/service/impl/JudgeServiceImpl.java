@@ -31,6 +31,9 @@ public class JudgeServiceImpl implements JudgeService {
     private ProblemRepository problemRepository;
 
     @Resource
+    private ContestRepository contestRepository;
+
+    @Resource
     private ProblemUserRepository problemUserRepository;
 
     @Resource
@@ -95,7 +98,7 @@ public class JudgeServiceImpl implements JudgeService {
     private ArrayList<String> currentOutTests;
 
     @Value("${code-location}")
-    private String codeLocation ;
+    private String codeLocation;
 
     @Value("${test-location}")
     private String testLocation;
@@ -194,9 +197,9 @@ public class JudgeServiceImpl implements JudgeService {
                     for (JudgeResponse judgeResponse : judgeResponses) {
                         Judge judge = pendingJudgeQueue.poll();
                         if (judgeResponse.token == null) {
-                                judge.setJudgeResult(JudgeResult.SE);   // 发送错误，子任务无法送入评测机，直接设置为SE
-                                judgeRepository.updateJudge(judge);
-                                recordRepository.setJudgeResult(judge.getRecordId(), judge.getJudgeResult(), judge.getExecuteTime(), judge.getExecuteMemory());
+                            judge.setJudgeResult(JudgeResult.SE);   // 发送错误，子任务无法送入评测机，直接设置为SE
+                            judgeRepository.updateJudge(judge);
+                            recordRepository.setJudgeResult(judge.getRecordId(), judge.getJudgeResult(), judge.getExecuteTime(), judge.getExecuteMemory());
                         } else {
                             judge.setJudgeToken(judgeResponse.getToken());
                             judge.setJudgeResult(JudgeResult.JD);
@@ -208,7 +211,7 @@ public class JudgeServiceImpl implements JudgeService {
                         }
                     }
                 } catch (RestClientException ex) {
-                    if(!ex.getMessage().equals("503")) {    // 发生错误且队列未满（队满会返回状态码503）
+                    if (!ex.getMessage().equals("503")) {    // 发生错误且队列未满（队满会返回状态码503）
                         ex.printStackTrace();
                         recordRepository.setJudgeResult(currentRecord.getId(), JudgeResult.SE, null, null);
                         judgeRepository.deleteJudgesByRecordId(currentRecord.getId());
@@ -289,25 +292,44 @@ public class JudgeServiceImpl implements JudgeService {
                                     maxMemory = Math.max(maxMemory, acceptedJudge.getExecuteMemory());
                                 }
                                 recordRepository.setJudgeResult(record.getId(), JudgeResult.AC, maxTime, maxMemory);
-                                if(record.getContestId() == null) {
+                                if (record.getContestId() == null) {
                                     problemRepository.increaseAccept(record.getProblemId());
                                     problemUserRepository.increaseAccept(record.getUserId(), record.getProblemId());
                                 } else {
                                     contestProblemRepository.increaseContestAccept(record.getContestId(), record.getProblemNumber());
                                     contestProblemUserRepository.increaseContestAccept(record.getContestId(), record.getProblemNumber(), record.getUserId());
+                                    Contest contest = contestRepository.getContestById(record.getContestId());
+                                    if (contest.getEndTime().after(record.getSubmitTime())) {
+                                        contestProblemRepository.setContestFirst(record.getContestId(), record.getProblemNumber(), record.getUserId());
+                                        contestProblemUserRepository.setContestTimeCost(record.getContestId(), record.getProblemNumber(),
+                                                record.getUserId(), record.getSubmitTime().getTime() - contest.getStartTime().getTime());
+                                    }
                                 }
                             }
                         } else if (judge.getJudgeResult() == JudgeResult.CE) {
                             recordRepository.setCompileOutput(judge.getRecordId(), judgeResultResponse.getCompileOutput());
                             recordRepository.setJudgeResult(judge.getRecordId(), JudgeResult.CE, null, null);
-                        } else if (judge.getJudgeResult() == JudgeResult.RE){
-                                Record record = recordRepository.getRecord(judge.getRecordId());
-                                if(judge.getExecuteMemory() >= problemRepository.getMemoryLimit(record.getProblemId()) * 1000) {
-                                    judge.setJudgeResult(JudgeResult.MLE);
+                        } else if (judge.getJudgeResult() == JudgeResult.RE) {
+                            Record record = recordRepository.getRecord(judge.getRecordId());
+                            if (judge.getExecuteMemory() >= problemRepository.getMemoryLimit(record.getProblemId()) * 1000) {
+                                judge.setJudgeResult(JudgeResult.MLE);
+                            }
+                            recordRepository.setJudgeResult(judge.getRecordId(), judge.getJudgeResult(), judge.getExecuteTime(), judge.getExecuteMemory());
+                            if(record.getContestId() != null) {
+                                Contest contest = contestRepository.getContestById(record.getContestId());
+                                if (contest.getEndTime().after(record.getSubmitTime())) {
+                                    contestProblemUserRepository.increaseContestAttempt(record.getContestId(), record.getProblemNumber(), record.getUserId());
                                 }
-                                recordRepository.setJudgeResult(judge.getRecordId(), judge.getJudgeResult(), judge.getExecuteTime(), judge.getExecuteMemory());
+                            }
                         } else {
                             recordRepository.setJudgeResult(judge.getRecordId(), judge.getJudgeResult(), judge.getExecuteTime(), judge.getExecuteMemory());
+                            Record record = recordRepository.getRecord(judge.getRecordId());
+                            if(record.getJudgeResult() != JudgeResult.SE && record.getContestId() != null) {
+                                Contest contest = contestRepository.getContestById(record.getContestId());
+                                if (contest.getEndTime().after(record.getSubmitTime())) {
+                                    contestProblemUserRepository.increaseContestAttempt(record.getContestId(), record.getProblemNumber(), record.getUserId());
+                                }
+                            }
                         }
                     }
                 }

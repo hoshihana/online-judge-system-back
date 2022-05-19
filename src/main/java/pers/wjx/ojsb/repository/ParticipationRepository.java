@@ -9,7 +9,7 @@ import pers.wjx.ojsb.pojo.Participation;
 public interface ParticipationRepository {
     boolean addParticipation(Integer contestId, Integer userId, String username, String nickname);
 
-    Integer deleteParticipationsByContestId(Integer contestId);
+    Integer deleteParticipationByContestId(Integer contestId);
 
     Participation getParticipation(Integer contestId, Integer userId);
 }

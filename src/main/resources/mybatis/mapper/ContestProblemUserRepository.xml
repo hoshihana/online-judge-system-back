@@ -9,8 +9,8 @@
         update contest_problem_user
         set submit = submit + 1
         where contest_id = #{contestId}
-            and problem_number = #{problemNumber}
-            and user_id = #{userId}
+          and problem_number = #{problemNumber}
+          and user_id = #{userId}
     </update>
     <update id="increaseContestAccept">
         update contest_problem_user
@@ -18,6 +18,22 @@
         where contest_id = #{contestId}
           and problem_number = #{problemNumber}
           and user_id = #{userId}
+    </update>
+    <update id="increaseContestAttempt">
+        update contest_problem_user
+        set attempt = attempt + 1
+        where contest_id = #{contestId}
+          and problem_number = #{problemNumber}
+          and user_id = #{userId}
+          and accept = 0
+    </update>
+    <update id="setContestTimeCost">
+        update contest_problem_user
+        set time_cost = 1200000 * attempt + #{timeCost}
+        where contest_id = #{contestId}
+          and problem_number = #{problemNumber}
+          and user_id = #{userId}
+          and time_cost is null
     </update>
     <delete id="deleteRelationsByContestId">
         delete
@@ -49,7 +65,33 @@
         select *
         from contest_problem_user
         where contest_id = #{contestId}
-            and problem_number = #{problemNumber}
+          and problem_number = #{problemNumber}
+          and user_id = #{userId}
+    </select>
+    <select id="getContestRankEntries" resultType="pers.wjx.ojsb.pojo.ContestRankEntry">
+        select user_id,
+               sum(time_cost)   as total_time_cost,
+               count(time_cost) as total_accept,
+               rank() over (order by total_accept desc, total_time_cost asc) as rank,
+        from contest_problem_user
+        where contest_id = #{contestId}
+        group by user_id
+            limit #{startIndex}, #{pageSize}
+    </select>
+    <select id="getAllContestRankEntries" resultType="pers.wjx.ojsb.pojo.ContestRankEntry">
+        select user_id,
+               sum(time_cost)   as total_time_cost,
+               count(time_cost) as total_accept,
+               rank() over (order by total_accept desc, total_time_cost asc) as rank,
+        from contest_problem_user
+        where contest_id = #{contestId}
+        group by user_id
+    </select>
+    <select id="getContestRankUnits" resultType="pers.wjx.ojsb.pojo.ContestRankUnit">
+        select problem_number, submit, accept, attempt, time_cost
+        from contest_problem_user
+        where contest_id = #{contestId}
             and user_id = #{userId}
+        order by problem_number asc
     </select>
 </mapper>

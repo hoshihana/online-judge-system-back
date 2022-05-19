@@ -32,6 +32,11 @@
         set problem_amount = #{problemAmount}
         where id = #{id}
     </update>
+    <update id="increaseContestParticipantAmount">
+        update contest
+        set participant_amount = participant_amount + 1
+        where id = #{id}
+    </update>
     <select id="getContestById" resultType="pers.wjx.ojsb.pojo.Contest">
         select *
         from contest

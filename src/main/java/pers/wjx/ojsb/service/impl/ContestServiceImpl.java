@@ -1,24 +1,20 @@
 package pers.wjx.ojsb.service.impl;
 
-import cn.dev33.satoken.secure.SaSecureUtil;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
-import org.springframework.web.bind.annotation.PathVariable;
 import pers.wjx.ojsb.exception.BadRequestException;
 import pers.wjx.ojsb.pojo.*;
-import pers.wjx.ojsb.pojo.enumeration.ContestType;
-import pers.wjx.ojsb.pojo.enumeration.JudgeResult;
-import pers.wjx.ojsb.pojo.enumeration.Language;
-import pers.wjx.ojsb.pojo.enumeration.Visibility;
+import pers.wjx.ojsb.pojo.enumeration.*;
 import pers.wjx.ojsb.repository.*;
 import pers.wjx.ojsb.service.ContestService;
 import pers.wjx.ojsb.service.RecordService;
 
 import javax.annotation.Resource;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.regex.Pattern;
@@ -53,6 +49,9 @@ public class ContestServiceImpl implements ContestService {
     @Resource
     private RecordService recordService;
 
+    @Resource
+    private StringRedisTemplate stringRedisTemplate;
+
     @Override
     public Integer addContest(Integer authorId, String name, ContestType type, String description, Boolean passwordSet, String password, Date startTime, Date endTime) {
         Contest contest = new Contest();
@@ -83,11 +82,12 @@ public class ContestServiceImpl implements ContestService {
     @Transactional(rollbackFor = Exception.class)
     public boolean resetContest(Integer id, Date startTime, Date endTime) {
         try {
-            participationRepository.deleteParticipationsByContestId(id);
+            participationRepository.deleteParticipationByContestId(id);
             contestProblemUserRepository.deleteRelationsByContestId(id);
             recordRepository.deleteRecordsByContestId(id);      // todo 相关judge未删除
             contestProblemRepository.resetContestProblem(id);
             contestRepository.setContestTime(id, startTime, endTime);
+            stringRedisTemplate.delete("rank:" + id);
             return true;
         } catch (Exception ex) {
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
@@ -98,6 +98,7 @@ public class ContestServiceImpl implements ContestService {
 
     @Override
     public boolean setContestEndTime(Integer id, Date endTime) {
+        stringRedisTemplate.delete("rank:" + id);
         return contestRepository.setContestEndTime(id, endTime);
     }
 
@@ -154,6 +155,7 @@ public class ContestServiceImpl implements ContestService {
         if (!contest.getPasswordSet() || contest.getPassword().equals(password)) {
             try {
                 participationRepository.addParticipation(id, userId, accountRepository.getUsernameById(userId), nickname);
+                contestRepository.increaseContestParticipantAmount(userId);
                 for(int i = 0; i < contestProblemEntries.size(); i++) {
                     contestProblemUserRepository.addRelation(id, contestProblemEntries.get(i).getId(), userId, i + 1);
                 }
@@ -307,6 +309,12 @@ public class ContestServiceImpl implements ContestService {
         }
     }
 
+    @Override
+    public boolean checkContestEnded(Integer id) {
+        Contest contest = contestRepository.getContestById(id);
+        return !(new Date()).before(contest.getEndTime()) && recordRepository.countPendingAndJudgingRecordsByContestId(id) > 0;
+    }
+
     private ArrayList<ContestType> getContestTypes(Boolean showPractice, Boolean showCompetition) {
         if(!showPractice && !showCompetition) {
             return new ArrayList<>(Arrays.asList(ContestType.PRAC, ContestType.COMP));
@@ -321,5 +329,49 @@ public class ContestServiceImpl implements ContestService {
         return types;
     }
 
+    private ArrayList<ContestRankHeaderUnit> getContestRankHeaderUnits(Integer contestId) {
+        ArrayList<ContestRankHeaderUnit> headerUnits = contestProblemRepository.getContestProblems(contestId);
+        for (ContestRankHeaderUnit headerUnit : headerUnits) {
+            headerUnit.setTriedParticipant(contestProblemUserRepository.countTriedParticipant(contestId, headerUnit.getProblemNumber()));
+            headerUnit.setPassedParticipant(contestProblemUserRepository.countPassedParticipant(contestId, headerUnit.getProblemNumber()));
+        }
+        return headerUnits;
+    }
 
+    private ArrayList<ContestRankEntry> getContestRankEntries(Integer contestId, Integer pageIndex, Integer pageSize, Boolean all) {
+        ArrayList<ContestRankEntry> contestRankEntries;
+        if(all) {
+            contestRankEntries = contestProblemUserRepository.getAllContestRankEntries(contestId);
+        } else {
+            contestRankEntries = contestProblemUserRepository.getContestRankEntries(contestId, (pageIndex - 1) * pageSize, pageSize);
+        }
+        for (ContestRankEntry contestRankEntry : contestRankEntries) {
+            Participation participation = participationRepository.getParticipation(contestId, contestRankEntry.getUserId());
+            contestRankEntry.setUsername(participation.getUsername());
+            contestRankEntry.setNickname(participation.getNickname());
+            contestRankEntry.setUnits(contestProblemUserRepository.getContestRankUnits(contestId, contestRankEntry.getUserId()));
+        }
+        return contestRankEntries;
+    }
+
+    @Override
+    public ContestRank getContestRank(Integer id, Integer pageIndex, Integer pageSize) {
+        if(checkContestEnded(id) && Boolean.TRUE.equals(stringRedisTemplate.hasKey("rank:" + id))) {
+            ContestRank contestRank = JSON.parseObject(stringRedisTemplate.opsForValue().get("rank:" + id), ContestRank.class);
+            contestRank.setEntries(new ArrayList<>(contestRank.getEntries().subList((pageIndex - 1) * pageSize, pageIndex * pageSize)));
+            return contestRank;
+        }
+        ContestRank contestRank = new ContestRank();
+        Contest contest = contestRepository.getContestById(id);
+        contestRank.setContestId(id);
+        contestRank.setProblemAmount(contest.getProblemAmount());
+        contestRank.setParticipantAmount(contest.getParticipantAmount());
+        contestRank.setHeaderUnits(getContestRankHeaderUnits(id));
+        if (checkContestEnded(id) && Boolean.FALSE.equals(stringRedisTemplate.hasKey("rank:" + id.toString()))) {
+            contestRank.setEntries(getContestRankEntries(id, null, null, true));
+            stringRedisTemplate.opsForValue().set("rank:" + id, JSON.toJSONString(contestRank));
+        }
+        contestRank.setEntries(getContestRankEntries(id, pageIndex, pageSize, false));
+        return contestRank;
+    }
 }

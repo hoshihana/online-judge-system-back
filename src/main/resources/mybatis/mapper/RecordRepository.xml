@@ -199,4 +199,10 @@
         where judge_result = 'AC'
           and date_format(submit_time, '%Y%m%d') like #{dayString}
     </select>
+    <select id="countPendingAndJudgingRecordsByContestId" resultType="java.lang.Integer">
+        select count(*)
+        from record
+        where contest_id = #{contestId}
+            and judge_result in ('PD', 'JD')
+    </select>
 </mapper>

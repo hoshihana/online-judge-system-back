@@ -50,4 +50,6 @@ public interface RecordRepository {
     Integer countRecordsByDay(String dayString);
 
     Integer countAcceptedRecordsByDay(String dayString);
+
+    Integer countPendingAndJudgingRecordsByContestId(Integer contestId);
 }

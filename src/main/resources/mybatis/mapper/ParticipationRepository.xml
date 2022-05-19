@@ -5,7 +5,7 @@
         insert into participation(contest_id, user_id, username, nickname)
         values(#{contestId}, #{userId}, #{username}, #{nickname})
     </insert>
-    <delete id="deleteParticipationsByContestId">
+    <delete id="deleteParticipationByContestId">
         delete from participation
         where contest_id = #{contestId}
     </delete>

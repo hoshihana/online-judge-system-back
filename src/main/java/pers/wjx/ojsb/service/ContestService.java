@@ -1,6 +1,7 @@
 package pers.wjx.ojsb.service;
 
 import pers.wjx.ojsb.pojo.*;
+import pers.wjx.ojsb.pojo.ContestRankEntry;
 import pers.wjx.ojsb.pojo.enumeration.ContestType;
 import pers.wjx.ojsb.pojo.enumeration.JudgeResult;
 import pers.wjx.ojsb.pojo.enumeration.Language;
@@ -58,4 +59,8 @@ public interface ContestService {
     Record getContestRecord(Integer id, Integer recordId);
 
     Integer submitCode(Integer id, Integer problemNumber, Problem problem, Integer userId, Language submitLanguage, String code);
+
+    boolean checkContestEnded(Integer id);
+
+    ContestRank getContestRank(Integer id, Integer pageIndex, Integer pageSize);
 }

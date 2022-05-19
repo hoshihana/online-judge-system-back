@@ -10,10 +10,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import pers.wjx.ojsb.exception.*;
 import pers.wjx.ojsb.pojo.*;
-import pers.wjx.ojsb.pojo.enumeration.ContestType;
-import pers.wjx.ojsb.pojo.enumeration.JudgeResult;
-import pers.wjx.ojsb.pojo.enumeration.Language;
-import pers.wjx.ojsb.pojo.enumeration.Visibility;
+import pers.wjx.ojsb.pojo.enumeration.*;
 import pers.wjx.ojsb.service.ContestService;
 import pers.wjx.ojsb.service.RecordService;
 
@@ -663,5 +660,23 @@ public class ContestController {
             throw new ForbiddenException("该比赛尚未结束，仅提交者和管理员可以查看该记录");
         }
         return "允许查看该记录";
+    }
+
+    @SaCheckLogin
+    @GetMapping("/{id}/rank")
+    public ContestRank getContestRank(@PathVariable Integer id,
+                                      @Min(value = 1, message = "页码不能小于1") Integer pageIndex,
+                                      @Min(value = 1, message = "页面大小不能小于1") Integer pageSize) {
+        Contest contest = contestService.getContestById(id);
+        if (contest == null) {
+            throw new NotFoundException("该比赛不存在");
+        }
+        if(!StpUtil.hasRole("ADMIN") && !contestService.isContestParticipant(id, StpUtil.getLoginIdAsInt())) {
+            throw new ForbiddenException("无权查看该比赛排行榜");
+        }
+        if((new Date()).before(contest.getStartTime())) {
+            throw new BadRequestException("比赛尚未开始，无法查看排行榜");
+        }
+        return contestService.getContestRank(id, pageIndex, pageSize);
     }
 }
