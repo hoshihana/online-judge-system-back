@@ -312,7 +312,22 @@ public class ContestServiceImpl implements ContestService {
     @Override
     public boolean checkContestEnded(Integer id) {
         Contest contest = contestRepository.getContestById(id);
-        return !(new Date()).before(contest.getEndTime()) && recordRepository.countPendingAndJudgingRecordsByContestId(id) > 0;
+        return !(new Date()).before(contest.getEndTime()) && recordRepository.countPendingAndJudgingRecordsByContestId(id) == 0;
+    }
+
+    @Override
+    public boolean setContestOpen(Integer id) {
+        if (checkContestEnded(id) && Boolean.FALSE.equals(stringRedisTemplate.hasKey("rank:" + id))) {
+            ContestRank contestRank = new ContestRank();
+            Contest contest = contestRepository.getContestById(id);
+            contestRank.setContestId(id);
+            contestRank.setProblemAmount(contest.getProblemAmount());
+            contestRank.setParticipantAmount(contest.getParticipantAmount());
+            contestRank.setHeaderUnits(getContestRankHeaderUnits(id));
+            contestRank.setEntries(getContestRankEntries(id, null, null, true));
+            stringRedisTemplate.opsForValue().set("rank:" + id, JSON.toJSONString(contestRank));
+        }
+        return contestRepository.setContestOpen(id);
     }
 
     private ArrayList<ContestType> getContestTypes(Boolean showPractice, Boolean showCompetition) {
@@ -356,8 +371,9 @@ public class ContestServiceImpl implements ContestService {
 
     @Override
     public ContestRank getContestRank(Integer id, Integer pageIndex, Integer pageSize) {
-        if(checkContestEnded(id) && Boolean.TRUE.equals(stringRedisTemplate.hasKey("rank:" + id))) {
+        if(Boolean.TRUE.equals(stringRedisTemplate.hasKey("rank:" + id))) {
             ContestRank contestRank = JSON.parseObject(stringRedisTemplate.opsForValue().get("rank:" + id), ContestRank.class);
+            assert contestRank != null;
             contestRank.setEntries(new ArrayList<>(contestRank.getEntries().subList((pageIndex - 1) * pageSize, pageIndex * pageSize)));
             return contestRank;
         }
@@ -367,7 +383,7 @@ public class ContestServiceImpl implements ContestService {
         contestRank.setProblemAmount(contest.getProblemAmount());
         contestRank.setParticipantAmount(contest.getParticipantAmount());
         contestRank.setHeaderUnits(getContestRankHeaderUnits(id));
-        if (checkContestEnded(id) && Boolean.FALSE.equals(stringRedisTemplate.hasKey("rank:" + id.toString()))) {
+        if (checkContestEnded(id) && Boolean.FALSE.equals(stringRedisTemplate.hasKey("rank:" + id))) {
             contestRank.setEntries(getContestRankEntries(id, null, null, true));
             stringRedisTemplate.opsForValue().set("rank:" + id, JSON.toJSONString(contestRank));
         }

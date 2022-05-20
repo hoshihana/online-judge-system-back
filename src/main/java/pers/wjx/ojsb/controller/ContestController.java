@@ -345,6 +345,9 @@ public class ContestController {
         if (current.before(contest.getStartTime())) {
             throw new BadRequestException("比赛尚未开始");
         }
+        if (!current.before(contest.getEndTime()) && !contest.getOpen()) {
+            throw new BadRequestException("比赛已结束且未开放，无法参加比赛");
+        }
         if (nickname != null && nickname.length() > 30) {
             throw new BadRequestException("参赛昵称长度不能超过30");
         }
@@ -501,6 +504,9 @@ public class ContestController {
         Date current = new Date();
         if (current.before(contest.getStartTime())) {
             throw new ForbiddenException("比赛尚未开始，无法提交代码");
+        }
+        if (!current.before(contest.getEndTime()) && !contest.getOpen()) {
+            throw new BadRequestException("比赛已结束且未开放，无法提交代码");
         }
         if (problem.getVisibility() == Visibility.PRIVATE) {
             throw new ForbiddenException("该题仅管理员可以提交代码");
@@ -678,5 +684,29 @@ public class ContestController {
             throw new BadRequestException("比赛尚未开始，无法查看排行榜");
         }
         return contestService.getContestRank(id, pageIndex, pageSize);
+    }
+
+    @SaCheckLogin
+    @SaCheckRole("ADMIN")
+    @PostMapping("/{id}/open")
+    public String setContestOpen(@PathVariable Integer id) {
+        Contest contest = contestService.getContestById(id);
+        if(contest == null) {
+            throw new NotFoundException("该比赛不存在");
+        }
+        if(StpUtil.getLoginIdAsInt() != contest.getAuthorId()) {
+            throw new ForbiddenException("无权开放该比赛");
+        }
+        if((new Date()).before(contest.getEndTime())) {
+            throw new BadRequestException("比赛尚未结束，无法开放比赛");
+        }
+        if(contestService.checkContestEnded(id)) {
+            throw new BadRequestException("比赛中记录尚未评测完成，暂时无法开放比赛");
+        }
+        if(contestService.setContestOpen(id)) {
+            return "比赛开放成功";
+        } else {
+            throw new InternalServerErrorException("比赛开放失败");
+        }
     }
 }

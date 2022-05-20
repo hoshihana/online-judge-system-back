@@ -40,5 +40,6 @@ public class Contest {
 
     private Integer participantAmount;
 
+    private Boolean open;
 }
 

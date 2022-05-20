@@ -36,4 +36,6 @@ public interface ContestRepository {
     Integer countUserContestsByName(Integer authorId, String name, ArrayList<ContestType> types);
 
     Integer increaseContestParticipantAmount(Integer id);
+
+    boolean setContestOpen(Integer id);
 }

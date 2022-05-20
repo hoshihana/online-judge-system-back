@@ -62,5 +62,7 @@ public interface ContestService {
 
     boolean checkContestEnded(Integer id);
 
+    boolean setContestOpen(Integer id);
+
     ContestRank getContestRank(Integer id, Integer pageIndex, Integer pageSize);
 }
