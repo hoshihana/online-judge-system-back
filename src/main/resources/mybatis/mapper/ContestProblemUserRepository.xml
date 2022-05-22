@@ -72,7 +72,7 @@
         select user_id,
                sum(time_cost)   as total_time_cost,
                count(time_cost) as total_accept,
-               rank() over (order by total_accept desc, total_time_cost asc) as rank,
+               rank() over (order by count(time_cost) desc, sum(time_cost) asc) as `rank`
         from contest_problem_user
         where contest_id = #{contestId}
         group by user_id
@@ -82,7 +82,7 @@
         select user_id,
                sum(time_cost)   as total_time_cost,
                count(time_cost) as total_accept,
-               rank() over (order by total_accept desc, total_time_cost asc) as rank,
+               rank() over (order by count(time_cost) desc, sum(time_cost) asc) as `rank`
         from contest_problem_user
         where contest_id = #{contestId}
         group by user_id

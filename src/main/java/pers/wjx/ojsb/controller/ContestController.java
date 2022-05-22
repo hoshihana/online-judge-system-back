@@ -284,7 +284,7 @@ public class ContestController {
 
     @SaCheckLogin
     @SaCheckRole("ADMIN")
-    @PatchMapping("/{id}/endTime")  // 修改比赛结束时间（比赛进行时/结束后可用）
+    @PatchMapping("/{id}/endTime")  // 修改比赛结束时间（比赛进行时/结束后且未开放可用）
     public String updateContestEndTime(@PathVariable Integer id, @NotNull(message = "结束时间不能为空") Date endTime) {
         endTime.setTime(endTime.getTime() - endTime.getTime() % (60 * 1000));
         Contest contest = contestService.getContestById(id);
@@ -297,6 +297,9 @@ public class ContestController {
         Date current = new Date();
         if (current.before(contest.getStartTime())) {
             throw new BadRequestException("比赛尚未开始，无法修改比赛结束时间");
+        }
+        if (contest.getOpen()) {
+            throw new BadRequestException("比赛已结束且已开放，无法修改结束时间");
         }
         if (endTime.getTime() - current.getTime() < 4 * 60 * 1000) {
             throw new BadRequestException("结束时间必须至少在当前时间的5分钟之后");
@@ -687,6 +690,22 @@ public class ContestController {
     }
 
     @SaCheckLogin
+    @GetMapping("/{id}/rank/entry")
+    public ContestRankEntry getContestRankEntry(@PathVariable Integer id) {
+        Contest contest = contestService.getContestById(id);
+        if (contest == null) {
+            throw new NotFoundException("该比赛不存在");
+        }
+        if(!StpUtil.hasRole("ADMIN") && !contestService.isContestParticipant(id, StpUtil.getLoginIdAsInt())) {
+            throw new ForbiddenException("无权查看该比赛排行榜");
+        }
+        if((new Date()).before(contest.getStartTime())) {
+            throw new BadRequestException("比赛尚未开始，无法查看排行榜");
+        }
+        return contestService.getContestRankEntryByUserId(id, StpUtil.getLoginIdAsInt());
+    }
+
+    @SaCheckLogin
     @SaCheckRole("ADMIN")
     @PostMapping("/{id}/open")
     public String setContestOpen(@PathVariable Integer id) {
@@ -707,6 +726,29 @@ public class ContestController {
             return "比赛开放成功";
         } else {
             throw new InternalServerErrorException("比赛开放失败");
+        }
+    }
+
+    @SaCheckLogin
+    @PatchMapping("/{id}/nickname")
+    public String updateContestParticipationNickname(@PathVariable Integer id, String nickname) {
+        Contest contest = contestService.getContestById(id);
+        if (contest == null) {
+            throw new NotFoundException("该比赛不存在");
+        }
+        if (!contestService.isContestParticipant(id, StpUtil.getLoginIdAsInt())) {
+            throw new BadRequestException("非参加者无法修改参赛昵称");
+        }
+        if(!(new Date()).before(contest.getEndTime())) {
+            throw new BadRequestException("比赛已结束，无法修改参赛昵称");
+        }
+        if (nickname != null && nickname.length() > 30) {
+            throw new BadRequestException("参赛昵称长度不能超过30");
+        }
+        if(contestService.updateContestParticipationNickname(id, StpUtil.getLoginIdAsInt(), nickname)) {
+            return "参赛昵称修改成功";
+        } else {
+            throw new InternalServerErrorException("参赛昵称修改失败");
         }
     }
 }

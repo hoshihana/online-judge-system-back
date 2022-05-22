@@ -12,4 +12,6 @@ public interface ParticipationRepository {
     Integer deleteParticipationByContestId(Integer contestId);
 
     Participation getParticipation(Integer contestId, Integer userId);
+
+    Integer setParticipationNickname(Integer contestId, Integer userId, String nickname);
 }

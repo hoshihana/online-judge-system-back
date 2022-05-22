@@ -5,6 +5,11 @@
         insert into participation(contest_id, user_id, username, nickname)
         values(#{contestId}, #{userId}, #{username}, #{nickname})
     </insert>
+    <update id="setParticipationNickname">
+        update participation
+        set nickname = #{nickname}
+        where contest_id = #{contestId} and user_id = #{userId}
+    </update>
     <delete id="deleteParticipationByContestId">
         delete from participation
         where contest_id = #{contestId}
@@ -14,5 +19,4 @@
         from participation
         where contest_id = #{contestId} and user_id = #{userId}
     </select>
-
 </mapper>

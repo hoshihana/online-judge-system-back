@@ -155,7 +155,7 @@ public class ContestServiceImpl implements ContestService {
         if (!contest.getPasswordSet() || contest.getPassword().equals(password)) {
             try {
                 participationRepository.addParticipation(id, userId, accountRepository.getUsernameById(userId), nickname);
-                contestRepository.increaseContestParticipantAmount(userId);
+                contestRepository.increaseContestParticipantAmount(id);
                 for(int i = 0; i < contestProblemEntries.size(); i++) {
                     contestProblemUserRepository.addRelation(id, contestProblemEntries.get(i).getId(), userId, i + 1);
                 }
@@ -360,11 +360,11 @@ public class ContestServiceImpl implements ContestService {
         } else {
             contestRankEntries = contestProblemUserRepository.getContestRankEntries(contestId, (pageIndex - 1) * pageSize, pageSize);
         }
-        for (ContestRankEntry contestRankEntry : contestRankEntries) {
-            Participation participation = participationRepository.getParticipation(contestId, contestRankEntry.getUserId());
-            contestRankEntry.setUsername(participation.getUsername());
-            contestRankEntry.setNickname(participation.getNickname());
-            contestRankEntry.setUnits(contestProblemUserRepository.getContestRankUnits(contestId, contestRankEntry.getUserId()));
+        for (ContestRankEntry entry : contestRankEntries) {
+            Participation participation = participationRepository.getParticipation(contestId, entry.getUserId());
+            entry.setUsername(participation.getUsername());
+            entry.setNickname(participation.getNickname());
+            entry.setUnits(contestProblemUserRepository.getContestRankUnits(contestId, entry.getUserId()));
         }
         return contestRankEntries;
     }
@@ -374,7 +374,7 @@ public class ContestServiceImpl implements ContestService {
         if(Boolean.TRUE.equals(stringRedisTemplate.hasKey("rank:" + id))) {
             ContestRank contestRank = JSON.parseObject(stringRedisTemplate.opsForValue().get("rank:" + id), ContestRank.class);
             assert contestRank != null;
-            contestRank.setEntries(new ArrayList<>(contestRank.getEntries().subList((pageIndex - 1) * pageSize, pageIndex * pageSize)));
+            contestRank.setEntries(new ArrayList<>(contestRank.getEntries().subList((pageIndex - 1) * pageSize, Math.min(pageIndex * pageSize, contestRank.getEntries().size()))));
             return contestRank;
         }
         ContestRank contestRank = new ContestRank();
@@ -389,5 +389,32 @@ public class ContestServiceImpl implements ContestService {
         }
         contestRank.setEntries(getContestRankEntries(id, pageIndex, pageSize, false));
         return contestRank;
+    }
+
+    @Override
+    public ContestRankEntry getContestRankEntryByUserId(Integer id, Integer userId) {
+        ArrayList<ContestRankEntry> entries;
+        if(Boolean.TRUE.equals(stringRedisTemplate.hasKey("rank:" + id))) {
+            entries = JSON.parseObject(stringRedisTemplate.opsForValue().get("rank:" + id), ContestRank.class).getEntries();
+        } else {
+            entries = contestProblemUserRepository.getAllContestRankEntries(id);
+        }
+        for(ContestRankEntry entry : entries) {
+            if(entry.getUserId().equals(userId)) {
+                if(Boolean.FALSE.equals(stringRedisTemplate.hasKey("rank:" + id))) {
+                    Participation participation = participationRepository.getParticipation(id, entry.getUserId());
+                    entry.setUsername(participation.getUsername());
+                    entry.setNickname(participation.getNickname());
+                    entry.setUnits(contestProblemUserRepository.getContestRankUnits(id, entry.getUserId()));
+                }
+                return entry;
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public boolean updateContestParticipationNickname(Integer id, Integer userId, String nickname) {
+        return participationRepository.setParticipationNickname(id, userId, nickname) > 0;
     }
 }

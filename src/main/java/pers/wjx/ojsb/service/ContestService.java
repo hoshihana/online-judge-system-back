@@ -65,4 +65,8 @@ public interface ContestService {
     boolean setContestOpen(Integer id);
 
     ContestRank getContestRank(Integer id, Integer pageIndex, Integer pageSize);
+
+    ContestRankEntry getContestRankEntryByUserId(Integer id, Integer userId);
+
+    boolean updateContestParticipationNickname(Integer id, Integer userId, String nickname);
 }
