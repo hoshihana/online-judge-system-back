@@ -205,4 +205,9 @@
         where contest_id = #{contestId}
             and judge_result in ('PD', 'JD')
     </select>
+    <select id="getAllContestRecordIds" resultType="java.lang.Integer">
+        select id
+        from record
+        where contest_id = #{contestId}
+    </select>
 </mapper>

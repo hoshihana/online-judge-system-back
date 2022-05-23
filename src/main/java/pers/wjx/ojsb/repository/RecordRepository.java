@@ -25,6 +25,8 @@ public interface RecordRepository {
 
     ArrayList<Record> getContestRecentRecords(Integer contestId, Integer problemNumber, Integer userId, Integer limit);
 
+    ArrayList<Integer> getAllContestRecordIds(Integer contestId);
+
     Record getRecord(Integer id);
 
     Record getContestRecord(Integer contestId, Integer recordId);

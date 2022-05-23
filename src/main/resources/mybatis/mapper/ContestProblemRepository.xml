@@ -7,7 +7,7 @@
     </insert>
     <update id="resetContestProblem">
         update contest_problem
-        set submit = 0, accept = 0
+        set submit = 0, accept = 0, first = null
         where contest_id = #{contestId}
     </update>
     <update id="increaseContestSubmit">

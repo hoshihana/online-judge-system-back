@@ -13,6 +13,8 @@ import java.util.Date;
 public interface ContestRepository {
     boolean addContest(Contest contest);
 
+    boolean deleteContest(Integer id);
+
     boolean updateContestDetail(Integer id, String name, ContestType type, String description, Boolean passwordSet, String password);
 
     boolean setContestProblemAmount(Integer id, Integer problemAmount);
@@ -36,6 +38,8 @@ public interface ContestRepository {
     Integer countUserContestsByName(Integer authorId, String name, ArrayList<ContestType> types);
 
     Integer increaseContestParticipantAmount(Integer id);
+
+    Integer resetContestParticipantAmount(Integer id);
 
     boolean setContestOpen(Integer id);
 }

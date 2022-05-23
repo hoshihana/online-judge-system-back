@@ -18,13 +18,15 @@
     </update>
     <update id="setContestEndTime">
         update contest
-        set end_time = #{endTime}
+        set end_time = #{endTime},
+            open = 0
         where id = #{id}
     </update>
     <update id="setContestTime">
         update contest
         set start_time = #{startTime},
-            end_time   = #{endTime}
+            end_time   = #{endTime},
+            open = 0
         where id = #{id}
     </update>
     <update id="setContestProblemAmount">
@@ -42,6 +44,16 @@
         set open = 1
         where id = #{id}
     </update>
+    <update id="resetContestParticipantAmount">
+        update contest
+        set participant_amount = 0
+        where id = #{id}
+    </update>
+    <delete id="deleteContest">
+        delete
+        from contest
+        where id = #{id}
+    </delete>
     <select id="getContestById" resultType="pers.wjx.ojsb.pojo.Contest">
         select *
         from contest

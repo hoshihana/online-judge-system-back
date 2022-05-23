@@ -87,6 +87,24 @@ public class ContestController {
         return contest;
     }
 
+    @SaCheckLogin
+    @SaCheckRole("ADMIN")
+    @DeleteMapping("/{id}")
+    public String deleteContest(@PathVariable Integer id) {
+        Contest contest = contestService.getContestById(id);
+        if (contest == null) {
+            throw new NotFoundException("该比赛不存在");
+        }
+        if(contest.getAuthorId() != StpUtil.getLoginIdAsInt()) {
+            throw new ForbiddenException("无权删除该比赛");
+        }
+        if(contestService.deleteContest(id)) {
+            return "比赛删除成功";
+        } else {
+            throw new InternalServerErrorException("比赛删除失败");
+        }
+    }
+
     @GetMapping("/recent")
     public ArrayList<Contest> getRecentContests(@Range(min = 1, max = 7, message = "查询天数需在1到7天之间")Integer dayLimit) {
         return contestService.getRecentContests(dayLimit);
@@ -719,7 +737,7 @@ public class ContestController {
         if((new Date()).before(contest.getEndTime())) {
             throw new BadRequestException("比赛尚未结束，无法开放比赛");
         }
-        if(contestService.checkContestEnded(id)) {
+        if(!contestService.checkContestEnded(id)) {
             throw new BadRequestException("比赛中记录尚未评测完成，暂时无法开放比赛");
         }
         if(contestService.setContestOpen(id)) {

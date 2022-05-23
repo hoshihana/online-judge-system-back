@@ -41,6 +41,9 @@ public class ContestServiceImpl implements ContestService {
     private RecordRepository recordRepository;
 
     @Resource
+    private JudgeRepository judgeRepository;
+
+    @Resource
     private ParticipationRepository participationRepository;
 
     @Resource
@@ -75,19 +78,24 @@ public class ContestServiceImpl implements ContestService {
 
     @Override
     public boolean setContestTime(Integer id, Date startTime, Date endTime) {
+        stringRedisTemplate.delete("rank:" + id);
         return contestRepository.setContestTime(id, startTime, endTime);
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public boolean resetContest(Integer id, Date startTime, Date endTime) {
+    public boolean deleteContest(Integer id) {
         try {
+            stringRedisTemplate.delete("rank:" + id);
             participationRepository.deleteParticipationByContestId(id);
             contestProblemUserRepository.deleteRelationsByContestId(id);
-            recordRepository.deleteRecordsByContestId(id);      // todo 相关judge未删除
-            contestProblemRepository.resetContestProblem(id);
-            contestRepository.setContestTime(id, startTime, endTime);
-            stringRedisTemplate.delete("rank:" + id);
+            ArrayList<Integer> recordIds = recordRepository.getAllContestRecordIds(id);
+            for (Integer recordId : recordIds) {
+                judgeRepository.deleteJudgesByRecordId(recordId);
+            }
+            recordRepository.deleteRecordsByContestId(id);
+            contestProblemRepository.deleteContestProblemsByContestId(id);
+            contestRepository.deleteContest(id);
             return true;
         } catch (Exception ex) {
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
@@ -95,6 +103,30 @@ public class ContestServiceImpl implements ContestService {
             return false;
         }
     }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean resetContest(Integer id, Date startTime, Date endTime) {
+        try {
+            stringRedisTemplate.delete("rank:" + id);
+            participationRepository.deleteParticipationByContestId(id);
+            contestProblemUserRepository.deleteRelationsByContestId(id);
+            ArrayList<Integer> recordIds = recordRepository.getAllContestRecordIds(id);
+            for(Integer recordId : recordIds) {
+                judgeRepository.deleteJudgesByRecordId(recordId);
+            }
+            recordRepository.deleteRecordsByContestId(id);
+            contestProblemRepository.resetContestProblem(id);
+            contestRepository.setContestTime(id, startTime, endTime);
+            contestRepository.resetContestParticipantAmount(id);
+            return true;
+        } catch (Exception ex) {
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+            ex.printStackTrace();
+            return false;
+        }
+    }
+
 
     @Override
     public boolean setContestEndTime(Integer id, Date endTime) {

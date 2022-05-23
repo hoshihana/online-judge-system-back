@@ -16,6 +16,8 @@ public interface ContestService {
 
     boolean setContestTime(Integer id, Date startTime, Date endTime);
 
+    boolean deleteContest(Integer id);
+
     boolean resetContest(Integer id, Date startTime, Date endTime);
 
     boolean setContestEndTime(Integer id, Date endTime);
