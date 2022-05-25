@@ -20,6 +20,8 @@ public interface AccountRepository {
 
     Integer countAccountsById(Integer id);
 
+    boolean setPassword(Integer id, String password);
+
     boolean setAvatar(Integer id, String avatar);
 
     boolean setSchool(Integer id, String school);

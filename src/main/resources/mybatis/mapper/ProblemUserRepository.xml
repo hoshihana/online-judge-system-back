@@ -26,4 +26,14 @@
         from problem_user
         where problem_id = #{problemId} and accept > 0
     </select>
+    <select id="countTriedProblemByUserId" resultType="java.lang.Integer">
+        select count(*)
+        from problem_user
+        where user_id = #{userId} and submit > 0
+    </select>
+    <select id="countPassedProblemByUserId" resultType="java.lang.Integer">
+        select count(*)
+        from problem_user
+        where user_id = #{userId} and accept > 0
+    </select>
 </mapper>

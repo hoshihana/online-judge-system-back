@@ -19,4 +19,9 @@
         from participation
         where contest_id = #{contestId} and user_id = #{userId}
     </select>
+    <select id="countParticipatedContestByUserId" resultType="java.lang.Integer">
+        select count(*)
+        from participation
+        where user_id = #{userId}
+    </select>
 </mapper>

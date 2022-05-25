@@ -18,6 +18,8 @@ public interface ProblemRepository {
 
     Problem getProblemById(Integer id);
 
+    Integer countProblemByAuthorId(Integer authorId);
+
     boolean deleteProblemById(Integer id);
 
     ArrayList<ProblemEntry> getPublicProblemEntriesByName(String name, Integer startIndex, Integer pageSize);

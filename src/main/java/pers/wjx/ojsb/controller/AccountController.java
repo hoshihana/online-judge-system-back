@@ -17,6 +17,7 @@ import pers.wjx.ojsb.service.AccountService;
 import javax.annotation.Resource;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 
 @RestController
@@ -83,9 +84,28 @@ public class AccountController {
     }
 
     @SaCheckLogin
+    @PatchMapping("/password")
+    public String updatePassword(@NotNull(message = "密码不能为空") String password,
+                                 @Pattern(regexp = "^[A-Za-z0-9]+$", message = "密码只能含有数字或字母")
+                                 @Length(min = 6, max = 16, message = "密码长度必须在6到16位之间")
+                                 @NotBlank(message = "密码不能为空") String newPassword) {
+        if (!accountService.checkPassword(StpUtil.getLoginIdAsInt(), password)) {
+            throw new BadRequestException("原密码错误");
+        }
+        if(accountService.checkPassword(StpUtil.getLoginIdAsInt(), newPassword)) {
+            throw new BadRequestException("新密码不能与原密码相同");
+        }
+        if(accountService.updatePassword(StpUtil.getLoginIdAsInt(), newPassword)) {
+            return "密码修改成功";
+        } else {
+            throw new InternalServerErrorException("密码修改失败");
+        }
+    }
+
+    @SaCheckLogin
     @PatchMapping("/avatar")
     public String updateAvatar(@Length(min = 1, max = 40, message = "头像生成信息长度要在1到40之间") String avatar) {
-        if(accountService.updateAvatar(StpUtil.getLoginIdAsInt(), avatar)) {
+        if (accountService.updateAvatar(StpUtil.getLoginIdAsInt(), avatar)) {
             return "头像修改成功";
         } else {
             throw new InternalServerErrorException("头像修改失败");
@@ -95,7 +115,7 @@ public class AccountController {
     @SaCheckLogin
     @PatchMapping("/school")
     public String updateSchool(@Length(min = 0, max = 40, message = "学校名称长度不能超过40") String school) {
-        if(accountService.updateSchool(StpUtil.getLoginIdAsInt(), school)) {
+        if (accountService.updateSchool(StpUtil.getLoginIdAsInt(), school)) {
             return "学校修改成功";
         } else {
             throw new InternalServerErrorException("学校修改失败");
@@ -116,10 +136,10 @@ public class AccountController {
     @GetMapping("/{id}")
     public Account getAccount(@PathVariable Integer id) {
         Account account = accountService.getAccountById(id);
-        if(account == null) {
+        if (account == null) {
             throw new NotFoundException("账号不存在");
         }
-        if(StpUtil.getLoginIdAsInt() != id) {
+        if (StpUtil.getLoginIdAsInt() != id) {
             account.setEmail(null);
         }
         return account;

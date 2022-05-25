@@ -27,4 +27,14 @@ public class Account {
     private String school;
 
     private String profile;
+
+    private Integer passedProblemAmount;
+
+    private Integer triedProblemAmount;
+
+    private Integer participatedContestAmount;
+
+    private Integer ownedProblemAmount;
+
+    private Integer ownedContestAmount;
 }

@@ -14,4 +14,6 @@ public interface ParticipationRepository {
     Participation getParticipation(Integer contestId, Integer userId);
 
     Integer setParticipationNickname(Integer contestId, Integer userId, String nickname);
+
+    Integer countParticipatedContestByUserId(Integer userId);
 }

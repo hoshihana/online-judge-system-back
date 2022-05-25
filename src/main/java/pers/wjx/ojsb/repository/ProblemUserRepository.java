@@ -17,4 +17,8 @@ public interface ProblemUserRepository {
     Integer countTriedUserByProblemId(Integer problemId);
 
     Integer countPassedUserByProblemId(Integer problemId);
+
+    Integer countTriedProblemByUserId(Integer userId);
+
+    Integer countPassedProblemByUserId(Integer userId);
 }

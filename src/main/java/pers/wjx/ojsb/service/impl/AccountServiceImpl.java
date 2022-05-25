@@ -4,8 +4,9 @@ import cn.dev33.satoken.secure.SaSecureUtil;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import pers.wjx.ojsb.pojo.Account;
+import pers.wjx.ojsb.pojo.Participation;
 import pers.wjx.ojsb.pojo.enumeration.Role;
-import pers.wjx.ojsb.repository.AccountRepository;
+import pers.wjx.ojsb.repository.*;
 import pers.wjx.ojsb.service.AccountService;
 
 import javax.annotation.Resource;
@@ -18,6 +19,18 @@ public class AccountServiceImpl implements AccountService {
 
     @Resource
     private AccountRepository accountRepository;
+
+    @Resource
+    private ProblemRepository problemRepository;
+
+    @Resource
+    private ContestRepository contestRepository;
+
+    @Resource
+    private ParticipationRepository participationRepository;
+
+    @Resource
+    private ProblemUserRepository problemUserRepository;
 
     @Override
     public boolean existUsername(String username) {
@@ -42,6 +55,7 @@ public class AccountServiceImpl implements AccountService {
         userAccount.setEmail(email);
         userAccount.setRole(Role.USER);
         userAccount.setAvatar(username);
+        userAccount.setProfile("这个人很懒，什么都没有写~");
         return accountRepository.addAccount(userAccount);
     }
 
@@ -59,6 +73,17 @@ public class AccountServiceImpl implements AccountService {
         } else {
             return account;
         }
+    }
+
+    @Override
+    public boolean checkPassword(Integer id, String password) {
+        Account account = accountRepository.getAccountById(id);
+        return account != null && account.getPassword().compareTo(SaSecureUtil.md5BySalt(password, passwordSalt)) == 0;
+    }
+
+    @Override
+    public boolean updatePassword(Integer id, String password) {
+        return accountRepository.setPassword(id, SaSecureUtil.md5BySalt(password, passwordSalt));
     }
 
     @Override
@@ -83,6 +108,19 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public Account getAccountById(Integer id) {
-        return accountRepository.getAccountById(id);
+        Account account = accountRepository.getAccountById(id);
+        if(account == null) {
+            return null;
+        }
+        account.setTriedProblemAmount(problemUserRepository.countTriedProblemByUserId(id));
+        account.setPassedProblemAmount(problemUserRepository.countPassedProblemByUserId(id));
+        if(account.getRole() == Role.USER) {
+            account.setParticipatedContestAmount(participationRepository.countParticipatedContestByUserId(id));
+        }
+        if(account.getRole() == Role.ADMIN) {
+            account.setOwnedProblemAmount(problemRepository.countProblemByAuthorId(id));
+            account.setOwnedContestAmount(contestRepository.countContestByAuthorId(id));
+        }
+        return account;
     }
 }

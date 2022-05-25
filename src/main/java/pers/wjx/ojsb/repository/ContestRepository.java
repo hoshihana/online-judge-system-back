@@ -25,6 +25,8 @@ public interface ContestRepository {
 
     Contest getContestById(Integer id);
 
+    Integer countContestByAuthorId(Integer authorId);
+
     ArrayList<Contest> getOngoingContests();
 
     ArrayList<Contest> getComingContestsByDay(String dayString);

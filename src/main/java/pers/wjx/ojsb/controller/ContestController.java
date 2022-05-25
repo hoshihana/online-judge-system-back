@@ -405,6 +405,32 @@ public class ContestController {
     }
 
     @SaCheckLogin
+    @GetMapping("/{id}/problems/{problemNumber}/permissions/get")
+    public String checkContestProblem(@PathVariable Integer id, @PathVariable Integer problemNumber) {
+        Contest contest = contestService.getContestById(id);
+        if (contest == null) {
+            throw new NotFoundException("该比赛不存在");
+        }
+        Problem problem = contestService.getContestProblem(id, problemNumber);
+        if (problem == null) {
+            throw new NotFoundException("该题目不存在");
+        }
+        if (!StpUtil.hasRole("ADMIN")) {
+            if (!contestService.isContestParticipant(id, StpUtil.getLoginIdAsInt())) {
+                throw new ForbiddenException("未参加比赛，无权查看该比赛题目");
+            }
+            Date current = new Date();
+            if (current.before(contest.getStartTime())) {
+                throw new ForbiddenException("比赛尚未开始，无法查看该比赛题目");
+            }
+            if (problem.getVisibility() == Visibility.PRIVATE) {
+                throw new ForbiddenException("该题仅管理员可见");
+            }
+        }
+        return "允许查看该题";
+    }
+
+    @SaCheckLogin
     @GetMapping("/{id}/problems/{problemNumber}")
     public Problem getContestProblem(@PathVariable Integer id, @PathVariable Integer problemNumber) {
         Contest contest = contestService.getContestById(id);

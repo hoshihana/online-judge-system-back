@@ -16,6 +16,10 @@ public interface AccountService {
 
     Account authenticate(String username, String password);
 
+    boolean checkPassword(Integer id, String password);
+
+    boolean updatePassword(Integer id, String password);
+
     String getUsernameById(Integer id);
 
     boolean updateAvatar(Integer id, String avatar);

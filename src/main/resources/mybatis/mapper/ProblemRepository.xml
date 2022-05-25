@@ -119,5 +119,10 @@
         where rownum >= ceil((rand() * (select count(*) from problem)))
             limit #{limit}
     </select>
+    <select id="countProblemByAuthorId" resultType="java.lang.Integer">
+        select count(*)
+        from problem
+        where author_id = #{authorId}
+    </select>
 
 </mapper>

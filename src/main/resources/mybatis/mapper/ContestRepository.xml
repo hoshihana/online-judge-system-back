@@ -121,4 +121,9 @@
             and current_timestamp &lt; start_time
         order by start_time asc
     </select>
+    <select id="countContestByAuthorId" resultType="java.lang.Integer">
+        select count(*)
+        from contest
+        where author_id = #{authorId}
+    </select>
 </mapper>
