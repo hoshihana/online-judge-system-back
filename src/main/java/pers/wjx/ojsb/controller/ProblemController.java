@@ -28,7 +28,7 @@ import javax.annotation.Resource;
 import javax.validation.constraints.NotNull;
 
 @RestController
-@RequestMapping("/problems")
+@RequestMapping("/api/problems")
 @Validated
 public class ProblemController {
 

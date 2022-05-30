@@ -27,7 +27,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 
 @RestController
-@RequestMapping("/records")
+@RequestMapping("/api/records")
 @Validated
 public class RecordController {
 
@@ -120,7 +120,7 @@ public class RecordController {
 
     @SaCheckLogin
     @GetMapping("/{id}/code")
-    public String getCode(@PathVariable Integer id, Language submitLanguage, Integer codeLength) {
+    public String getCode(@PathVariable Integer id, @NotNull(message = "提交语言不能为空") Language submitLanguage, @NotNull(message = "代码长度不能为空") Integer codeLength) {
         Record record = recordService.getRecord(id);
         if (record == null) {
             throw new NotFoundException("该记录不存在");

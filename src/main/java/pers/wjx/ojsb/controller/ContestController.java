@@ -25,7 +25,7 @@ import java.util.Date;
 import java.util.regex.Pattern;
 
 @RestController
-@RequestMapping("/contests")
+@RequestMapping("/api/contests")
 @Validated
 public class ContestController {
 

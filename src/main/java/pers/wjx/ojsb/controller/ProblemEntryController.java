@@ -20,7 +20,7 @@ import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 
 @RestController
-@RequestMapping("/problemEntries")
+@RequestMapping("/api/problemEntries")
 @Validated
 public class ProblemEntryController {
 

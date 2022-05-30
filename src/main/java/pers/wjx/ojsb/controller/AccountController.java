@@ -21,7 +21,7 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 
 @RestController
-@RequestMapping("/accounts")
+@RequestMapping("/api/accounts")
 @Validated
 public class AccountController {
 
