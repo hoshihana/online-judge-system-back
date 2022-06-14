@@ -1,6 +1,9 @@
 package pers.wjx.ojsb.service.impl;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -103,9 +106,6 @@ public class JudgeServiceImpl implements JudgeService {
     @Value("${test-location}")
     private String testLocation;
 
-    @Value("${judge-base-url}")
-    private String judgeBaseUrl;
-
     @Override
     @Async
     // 每次处理一条记录(record)，将每个测试点分为子任务(judge)送入评测机
@@ -190,9 +190,18 @@ public class JudgeServiceImpl implements JudgeService {
                     judgeRequests.add(judgeRequest);
                 }
                 try {
+                    HttpHeaders httpHeaders = new HttpHeaders();
+                    httpHeaders.add("content-type", "application/json");
+                    httpHeaders.add("Content-Type", "application/json");
+                    httpHeaders.add("X-RapidAPI-Key", "1488441391mshfd0ef527e2e1619p151d99jsn81ad695fd86d");
+                    httpHeaders.add("X-RapidAPI-Host", "judge0-ce.p.rapidapi.com");
+                    httpHeaders.add("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.99 Safari/537.36");
+                    HttpEntity<JudgeRequestBatch> httpEntity = new HttpEntity<>(
+                            new JudgeRequestBatch(judgeRequests.toArray(new JudgeRequest[judgeRequests.size()])),
+                            httpHeaders);
                     List<JudgeResponse> judgeResponses = Arrays.asList(
-                            restTemplate.postForObject(judgeBaseUrl + "/submissions/batch?base64_encoded=true"
-                                    , new JudgeRequestBatch(judgeRequests.toArray(new JudgeRequest[judgeRequests.size()]))
+                            restTemplate.postForObject("https://judge0-ce.p.rapidapi.com/submissions/batch?base64_encoded=true"
+                                    , httpEntity
                                     , JudgeResponse[].class));
                     for (JudgeResponse judgeResponse : judgeResponses) {
                         Judge judge = pendingJudgeQueue.poll();
@@ -264,8 +273,13 @@ public class JudgeServiceImpl implements JudgeService {
                 for (Judge judge : checkingJudgeQueue) {
                     tokens.add(judge.getJudgeToken());
                 }
-                JudgeResultResponseBatch judgeResultResponseBatch = restTemplate.getForObject(judgeBaseUrl + "/submissions/batch?base64_encoded=true&tokens=" +
-                        String.join(",", tokens) + "&fields=" + judgeResultResponseFields, JudgeResultResponseBatch.class);
+                HttpHeaders httpHeaders = new HttpHeaders();
+                httpHeaders.set("X-RapidAPI-Key", "1488441391mshfd0ef527e2e1619p151d99jsn81ad695fd86d");
+                httpHeaders.set("X-RapidAPI-Host", "judge0-ce.p.rapidapi.com");
+                httpHeaders.add("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.99 Safari/537.36");
+                JudgeResultResponseBatch judgeResultResponseBatch = restTemplate.exchange("https://judge0-ce.p.rapidapi.com/submissions/batch?base64_encoded=true&tokens=" +
+                        String.join(",", tokens) + "&fields=" + judgeResultResponseFields,
+                        HttpMethod.GET, new HttpEntity(null, httpHeaders), JudgeResultResponseBatch.class).getBody();
                 List<JudgeResultResponse> judgeResultResponses = Arrays.asList(judgeResultResponseBatch.getSubmissions());
                 // System.out.println(judgeResultResponses);
                 for (JudgeResultResponse judgeResultResponse : judgeResultResponses) {

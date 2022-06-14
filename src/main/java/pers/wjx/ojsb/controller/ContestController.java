@@ -573,7 +573,6 @@ public class ContestController {
     }
 
     @SaCheckLogin
-    @SaCheckRole("USER")
     @GetMapping("/{id}/problems/{problemNumber}/records/recent")
     public ArrayList<Record> getContestProblemRecentRecord(@PathVariable Integer id, @PathVariable Integer problemNumber, @Min(value = 0, message = "返回记录条数必须为非负数") Integer limit) {
         Contest contest = contestService.getContestById(id);
@@ -583,6 +582,9 @@ public class ContestController {
         Problem problem = contestService.getContestProblem(id, problemNumber);
         if (problem == null) {
             throw new NotFoundException("该题目不存在");
+        }
+        if(StpUtil.hasRole("ADMIN")) {
+            return new ArrayList<>();
         }
         if (!contestService.isContestParticipant(id, StpUtil.getLoginIdAsInt())) {
             throw new ForbiddenException("未参加比赛，无权查看该题目最近提交");
